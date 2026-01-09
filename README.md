@@ -12,6 +12,7 @@ fjbk-fraud-detection/
 ├── notebooks/          # EDA et Visualisation 
 ├── src/                # Code source modulaire
 │   ├── ingestion/      # Scripts pour lire les données 
+│   ├── API             # API
 │   ├── processing/     # Nettoyage et Feature Engineering 
 │   ├── models/         # Entraînement et évaluation (ML)
 │   └── dashboard/      # Interface Streamlit 
