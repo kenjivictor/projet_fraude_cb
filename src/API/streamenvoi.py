@@ -10,7 +10,9 @@ df = pd.read_csv(FILE_PATH)
 
 for index, row in df.iterrows():
     transaction = row.to_dict()
-    time.sleep(0.5)
+    time.sleep(0.001)
     print(transaction)
     response = requests.post(API, json=transaction)
     print(response.status_code)
+    
+# Pour lancer le script : python src/API/streamenvoi.py
