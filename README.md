@@ -3,9 +3,9 @@
 Ce projet est réalisé dans le cadre de la formation DATA ANALYST de la WILD CODE SCHOOL.
 
 # Lancement Fast api
-streamenvoi.py : python src/API/streamenvoi.py
-streamrecepteur.py : uv run uvicorn src/API/streamrecepteur:app --reload
-Pour acceder au rapport du nombre de fraudes : http://127.0.0.1:8000/report
+1. Lancement du serveur : `uv run uvicorn src/API/streamrecepteur:app --reload`
+2. Envoi des requêtes : `python src/API/streamenvoi.py`
+3. Acceder au rapport du nombre de fraudes en temps réel : `http://{serverURI}:{serverPort}/report`
 
 
 
