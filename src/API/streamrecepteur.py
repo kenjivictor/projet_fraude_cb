@@ -7,12 +7,13 @@ import numpy as np
 app = FastAPI()
 
 # Chargement du modele, des colonnes et du preprocesseur : 
-model = joblib.load('model/model_ml.joblib')
-preprocessor = joblib.load('model/preprocessor.joblib')
-features_list = joblib.load('model/features_list.joblib')
+model = joblib.load('src/models/model_ml.joblib')
+preprocessor = joblib.load('src/models/preprocessor.joblib')
+features_list = joblib.load('src/models/features_list.joblib')
 
 # Liste pour stocker les fraudes detectees  
 frauds_detected = []
+infos = {"nb_transactions" : 0}
 
 # Defini le Json attendu en entree
 class TransmissionRequest(BaseModel):
@@ -41,6 +42,7 @@ async def recevoir_transaction(transaction: TransmissionRequest):
     prediction = model.predict(X_transformed)
         
     verdict = "FRAUDE" if prediction[0] == 1 else "SAIN"
+    infos["nb_transactions"] += 1
 
     if prediction[0] == 1:
         frauds_detected.append({
@@ -59,7 +61,8 @@ async def recevoir_transaction(transaction: TransmissionRequest):
 async def get_report():
     return {
         "nb_fraudes_detectees": len(frauds_detected),
-        "details": frauds_detected
+        "details": frauds_detected,
+        "infos": infos,
     }
 
 # Pour lancer le serveur : uv run uvicorn src.API.streamrecepteur:app --reload
