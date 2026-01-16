@@ -10,6 +10,7 @@ Ce projet est réalisé dans le cadre de la formation DATA ANALYST de la WILD CO
 
 
 # Structure du projet
+```
 fjbk-fraud-detection/
 ├── data/               # Stockage des datasets bruts et transformés (ignorez via .gitignore)
 ├── docs/               # Documentation technique et choix du dataset
@@ -24,3 +25,4 @@ fjbk-fraud-detection/
 ├── tests/              # Tests unitaires pour le pipeline 
 ├── requirements.txt    # Bibliothèques
 └── README.md           # Guide du projet et méthodologie
+```
