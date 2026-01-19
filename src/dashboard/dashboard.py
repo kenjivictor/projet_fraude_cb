@@ -1,17 +1,20 @@
 import streamlit as st
 import pandas as pd
 import requests
+import os
 import time
 
-API_LINK = "http://127.0.0.1:8000"
+API_BASE_URL = os.getenv("API_URL", "http://127.0.0.1:8000")
+REPORT_URL = f"{API_BASE_URL}"
 
 def get_report():
-    response = requests.get(API_LINK + "/report")
-    if response.status_code == 200:
-        return response.json()
-    else:
+    try:
+        response = requests.get(REPORT_URL + "/report", timeout=2)
+        if response.status_code == 200:
+            return response.json()
+    except Exception:
         return None
-
+    return None
 
 
 st.title("Détection de fraude")
@@ -50,7 +53,7 @@ while True:
         with placeholder.container():
             
             col1, col2, col3, col4 = st.columns(4)
-            col1.metric("Nb transactions", nb_transactions)
+            col1.metric("Nombre de transactions", nb_transactions)
             col2.metric("Nb fraudes", nb_fraudes_detectees)
             col3.metric("% " + "fraudes", f"{pourcent_fraude} %")
             
@@ -59,9 +62,18 @@ while True:
             col2.metric("Montant moyen par fraude", moyenne_par_fraude)
             
             if nb_fraudes_detectees >0:
+                st.write("### Détails des fraudes détectées")
                 st.dataframe(df)
-                st.line_chart({"data": list_pourcent_fraude})
+                colgraph1, colgraph2 = st.columns(2)
+                with colgraph1:
+                    st.write("### Pourcentage de fraudes")
+                    st.line_chart({"data": list_pourcent_fraude})
+                
+                with colgraph2:
+                    st.write("### Répartition des fraudes")
+                    type_counts = df['type'].value_counts()
+                    st.bar_chart(type_counts)
+
             
-            
-            time.sleep(5)
+        time.sleep(1)
 
