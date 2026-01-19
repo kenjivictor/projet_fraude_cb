@@ -1,15 +1,35 @@
 
 # Application de détection de fraude à la carte bancaire
+
 Ce projet est réalisé dans le cadre de la formation DATA ANALYST de la WILD CODE SCHOOL.
 
+
+# Prérequis
+
+- **Docker** et **Docker Compose** installés sur votre machine.
+- Le fichier de données `PaySim_stream.csv` et `PaySim_historical.csv` placé dans le dossier `./data/`.
+
 # Lancement Fast api
-1. Lancement du serveur : `uv run uvicorn src/API/streamrecepteur:app --reload`
-2. Envoi des requêtes : `python src/API/streamenvoi.py`
-3. Acceder au rapport du nombre de fraudes en temps réel : `http://{serverURI}:{serverPort}/report`
 
+1. **Cloner le projet**
+2. **Lancer l'environnement avec Docker Compose :**
 
+    ```
+   docker-compose up --build
+    ```
+
+# Ouvrir streamlit
+
+http://localhost:8501/ Dans la barre d'url'
+
+# Afficher les rapports/docu API
+
+http://localhost:8000/report
+
+http://localhost:8000/docs
 
 # Structure du projet
+
 ```
 fjbk-fraud-detection/
 ├── data/               # Stockage des datasets bruts et transformés (ignorez via .gitignore)

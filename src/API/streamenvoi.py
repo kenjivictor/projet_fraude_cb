@@ -1,10 +1,22 @@
 import pandas as pd
 import requests
 import time
+import os
 
 FILE_PATH = "data/PaySim_stream.csv"
 #adresse de l'api qui envoie
-API = "http://127.0.0.1:8000/predict"
+BASE_URL = os.getenv("API_URL", "http://127.0.0.1:8000")
+API = f"{BASE_URL}/predict"
+
+#Tentative de connexion
+while True:
+    try:
+        requests.get(BASE_URL) 
+        print("API en ligne !")
+        break
+    except:
+        time.sleep(1)
+
 
 df = pd.read_csv(FILE_PATH)
 
