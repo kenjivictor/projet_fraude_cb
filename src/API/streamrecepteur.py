@@ -3,13 +3,13 @@ from pydantic import BaseModel
 import joblib
 import pandas as pd
 import numpy as np
+import os
+from datetime import datetime
 
 app = FastAPI()
 
-# Chargement du modele, des colonnes et du preprocesseur : 
-model = joblib.load('src/models/model_ml.joblib')
-preprocessor = joblib.load('src/models/preprocessor.joblib')
-features_list = joblib.load('src/models/features_list.joblib')
+# Chargement du pipeline
+pipeline = joblib.load('src/models/pipeline_latest.joblib')
 
 # Liste pour stocker les fraudes detectees  
 frauds_detected = []
@@ -37,9 +37,7 @@ async def recevoir_transaction(transaction: TransmissionRequest):
     df['hour'] = df['step'] % 24
     df['nameOrig'] = df['nameOrig'].str[0]
     df['nameDest'] = df['nameDest'].str[0]
-    df = df[features_list]
-    X_transformed = preprocessor.transform(df)
-    prediction = model.predict(X_transformed)
+    prediction = pipeline.predict(df)
         
     verdict = "FRAUDE" if prediction[0] == 1 else "SAIN"
     infos["nb_transactions"] += 1
@@ -64,6 +62,18 @@ async def get_report():
         "details": frauds_detected,
         "infos": infos,
     }
+
+
+@app.get("/reload")
+async def reload_model():
+    global pipeline
+    # On récuprer l'heure du fichier et le model le plus récent pour le versionning
+    pipeline = joblib.load('src/models/pipeline_latest.joblib')
+    timestamp = os.path.getmtime('src/models/pipeline_latest.joblib')
+    date_formatee = datetime.fromtimestamp(timestamp).strftime('%d/%m %H:%M:%S')
+    return {"status": "success", "modele_du": date_formatee}
+
+
 
 # Pour lancer le serveur : uv run uvicorn src.API.streamrecepteur:app --reload
 # Pour acceder au rapport : http://127.0.0.1:8000/report
