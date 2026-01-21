@@ -7,9 +7,8 @@ import time
 # Page conffig
 st.set_page_config(
     page_title="Détection de Fraude",
-    layout="wide",  # C'est cette ligne qui fait la magie
-    initial_sidebar_state="expanded"
-)
+    layout="wide", 
+    initial_sidebar_state="expanded")
 
 
 API_BASE_URL = os.getenv("API_URL", "http://127.0.0.1:8000")
