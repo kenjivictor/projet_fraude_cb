@@ -30,6 +30,7 @@ class TransmissionRequest(BaseModel):
     newbalanceDest: float
     isFraud: int #Uniquement pour connaitre la verite terrain. En tant normal, on aurait un retour client
     isFlaggedFraud: int
+    
  # Initialisation de la matrice de confusion   
 matrix_stats = {"vrais_positifs": 0,
                         "faux_positifs": 0, 
@@ -66,18 +67,28 @@ async def recevoir_transaction(transaction: TransmissionRequest):
     
     # modèle de stockage dans redis au format dictionnaire
     res_to_store = {
-        "step": int(transaction.step),
-        "type": str(transaction.type),
-        "amount": float(transaction.amount),
-        "nameOrig": str(transaction.nameOrig),
-        "nameDest": str(transaction.nameDest), 
-        "verdict": "ALERTE FRAUDE" if prediction[0] == 1 else "SAIN"
-    }
+            "step": int(transaction.step),
+            "type": str(transaction.type),
+            "amount": float(transaction.amount),
+            "nameOrig": str(transaction.nameOrig),
+            "oldbalanceOrg": float(transaction.oldbalanceOrg), # Ajouté
+            "newbalanceOrig": float(transaction.newbalanceOrig), # Ajouté
+            "nameDest": str(transaction.nameDest), 
+            "oldbalanceDest": float(transaction.oldbalanceDest), # Ajouté
+            "newbalanceDest": float(transaction.newbalanceDest), # Ajouté
+            "isFraud": int(transaction.isFraud),                # La donnée reçue (vérité)
+            "isFlaggedFraud": int(transaction.isFlaggedFraud),  # Ajouté
+            "verdict": verdict                                  # Ta prédiction
+        }
     # convertir en texte pour Redis
     json_data = json.dumps(res_to_store)
 
-    # double liste dans Redis (flux_global et liste_fraudes)
+    # --- --Flux Bigquery ------------
     r.lpush("flux_global", json_data)   
+    
+    # ------ Flux Streamlit -----------
+    r.lpush("flux_streamlit", json_data)
+    
 
     if prediction[0] == 1:
         r.lpush("liste_fraudes", json_data)
@@ -93,7 +104,7 @@ async def recevoir_transaction(transaction: TransmissionRequest):
 
 @app.get("/report")
 async def report():
-    total_traitees = r.llen("flux_global")
+    total_traitees = r.llen("flux_streamlit")
     fraudes_brutes = r.lrange("liste_fraudes", 0, -1) 
     
     # dictionnaire des fraudes détectées

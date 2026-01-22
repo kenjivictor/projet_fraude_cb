@@ -41,6 +41,7 @@ http://localhost:8000/docs
 # poru lancer sans docker
 
 uv run python src/API/streamrecepteur.py
+
 uv run uvicorn src.API.streamrecepteur:app --reload --port 8000
 
 # Structure du projet
@@ -92,3 +93,5 @@ fjbk-fraud-detection/
 
    pour supprimer les volumes persistans (suppression aussi de la configuration redis)
    => docker-compose down -v
+
+7. Supprimer dans bigquery : TRUNCATE TABLE `paysim_raw.predictions_transaction`

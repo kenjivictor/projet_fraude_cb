@@ -6,6 +6,8 @@ from google.cloud import bigquery
 
 # connexion à Redis
 REDIS_HOST = os.getenv("REDIS_HOST", "redis-service")
+# On crée la connexion. decode_responses=True permet de recevoir du texte 
+# au lieu de données binaires
 r = redis.Redis(host=REDIS_HOST, port=6379, db=0, decode_responses=True)
 
 # test de connexion
@@ -25,26 +27,29 @@ table_id = "projet-fraude-paysim.paysim_raw.predictions_transaction"
 while True:
     paquet_a_envoyer = []
     
-    for _ in range(200):
+    for _ in range(2000):
+        # Recupère la donnée et la supprime
         donnee_brute = r.rpop("flux_global")
         
+        # Verifie si redis a retourné une donnée
         if donnee_brute:
             transaction = json.loads(donnee_brute)
             paquet_a_envoyer.append(transaction)
+        #Si pas de donnée, on sort
         else:
             break
-
-        if paquet_a_envoyer:
-            print(f"Tentative d'envoi vers BigQuery...", flush=True)
-            errors = client.insert_rows_json(table_id, paquet_a_envoyer)
+        
+        
+    if paquet_a_envoyer:
+        print(f"Tentative d'envoi {len(paquet_a_envoyer)} lignes vers BigQuery...", flush=True)
+        errors = client.insert_rows_json(table_id, paquet_a_envoyer)
 
         if errors == []:
-            print("Succès : Google a accepté le paquet !", flush=True)
+            print(f"Succès : {len(paquet_a_envoyer)} lignes insérées.", flush=True)
         else:
             print("ERREUR GOOGLE :", flush=True)
             print(errors, flush=True)
             
-        time.sleep(1) # Simule le temps de réponse de Google
         print("Envoi réussi !")
     
-    time.sleep(5)
+    time.sleep(30)
