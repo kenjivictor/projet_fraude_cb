@@ -37,6 +37,12 @@ http://localhost:8000/report
 
 http://localhost:8000/docs
 
+
+# poru lancer sans docker
+
+uv run python src/API/streamrecepteur.py
+uv run uvicorn src.API.streamrecepteur:app --reload --port 8000
+
 # Structure du projet
 
 ```
