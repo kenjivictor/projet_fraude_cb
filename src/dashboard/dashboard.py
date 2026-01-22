@@ -30,7 +30,13 @@ def metric_card(label, value, color="#f0f2f6"):
     )
 
 
-API_BASE_URL = os.getenv("API_URL", "http://127.0.0.1:8000")
+# Page config
+st.set_page_config(
+    page_title="Détection de Fraude",
+    layout="wide", 
+    initial_sidebar_state="expanded")
+
+API_BASE_URL = os.getenv("API_URL", "http://api-recepteur:8000")
 REPORT_URL = f"{API_BASE_URL}"
 
 def get_report():
@@ -41,11 +47,6 @@ def get_report():
     except Exception:
         return None
     return None
-
-
-
-
-
 
 list_pourcent_fraude = []
 
@@ -72,8 +73,8 @@ def page_stats():
             #calcul des métriques
             
             if len(df):
-                montant_total_intercepte = round(df["montant"].sum(),2)
-                moyenne_par_fraude = round(df["montant"].mean(),2)
+                montant_total_intercepte = round(df["amount"].sum(),2)
+                moyenne_par_fraude = round(df["amount"].mean(),2)
             else:
                 montant_total_intercepte = 0
                 moyenne_par_fraude = 0

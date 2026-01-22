@@ -3,19 +3,21 @@ from pydantic import BaseModel
 import joblib
 import pandas as pd
 import numpy as np
+import redis
+import json 
 import os
 from datetime import datetime
 
 app = FastAPI()
 
-# Chargement du pipeline
+# configuration & connexion au conteneur redis
+REDIS_HOST = os.getenv("REDIS_HOST", "redis") 
+r = redis.Redis(host=REDIS_HOST, port=6379, db=0)
+
+# chargement du pipeline
 pipeline = joblib.load('src/models/pipeline_latest.joblib')
 
-# Liste pour stocker les fraudes detectees  
-frauds_detected = []
-infos = {"nb_transactions" : 0}
-
-# Defini le Json attendu en entree
+# défini le Json attendu en entree
 class TransmissionRequest(BaseModel):
     step: int
     type: str
@@ -34,13 +36,17 @@ matrix_stats = {"vrais_positifs": 0,
                         "vrais_negatifs": 0, 
                         "faux_negatifs": 0}
     
-#Réception et traitement des donnees! Prediciton se fera ioci   
+    
+    
+    
+
+# réception et traitement des donnees
 @app.post("/predict")
 async def recevoir_transaction(transaction: TransmissionRequest):
-    #Conversion json en DataFrame
-    df = pd.DataFrame([transaction.dict()])
-    realite = df.pop('isFraud').iloc[0]
     # Manipulation des données pour correspondre au modèle
+    df = pd.DataFrame([transaction.model_dump()])   
+    # On recupere la fraude pour les metriques
+    realite = df.pop('isFraud').iloc[0]
     df['hour'] = df['step'] % 24
     df['nameOrig'] = df['nameOrig'].str[0]
     df['nameDest'] = df['nameDest'].str[0]
@@ -57,30 +63,49 @@ async def recevoir_transaction(transaction: TransmissionRequest):
         matrix_stats["vrais_positifs"] += 1
         
     verdict = "FRAUDE" if prediction[0] == 1 else "SAIN"
-    infos["nb_transactions"] += 1
+    
+    # modèle de stockage dans redis au format dictionnaire
+    res_to_store = {
+        "step": int(transaction.step),
+        "type": str(transaction.type),
+        "amount": float(transaction.amount),
+        "nameOrig": str(transaction.nameOrig),
+        "nameDest": str(transaction.nameDest), 
+        "verdict": "ALERTE FRAUDE" if prediction[0] == 1 else "SAIN"
+    }
+    # convertir en texte pour Redis
+    json_data = json.dumps(res_to_store)
+
+    # double liste dans Redis (flux_global et liste_fraudes)
+    r.lpush("flux_global", json_data)   
 
     if prediction[0] == 1:
-        frauds_detected.append({
-            "step": transaction.step,
-            "montant": transaction.amount,
-            "client": transaction.nameOrig,
-            "type": transaction.type
-        })
+        r.lpush("liste_fraudes", json_data)
+        # r.expire("liste_fraudes", 172800) => Facultatif on garde 2j la liste
         print(f"ALERTE : Fraude détectée ! Montant: {transaction.amount}€")
     else:
         print(f"Transaction saine : {transaction.amount}€")
-        
     return {"prediction": verdict, "status": "success"}
 
+
+
+
+
 @app.get("/report")
-async def get_report():
+async def report():
+    total_traitees = r.llen("flux_global")
+    fraudes_brutes = r.lrange("liste_fraudes", 0, -1) 
+    
+    # dictionnaire des fraudes détectées
+    fraudes_decodees = [json.loads(f) for f in fraudes_brutes]
+    
+    # réponse pour Streamlit
     return {
-        "nb_fraudes_detectees": len(frauds_detected),
-        "details": frauds_detected,
-        "infos": infos,
+        "infos":  {"nb_transactions" : total_traitees},
+        "details": fraudes_decodees,
+        "nb_fraudes_detectees": len(fraudes_decodees),
         "matrix": matrix_stats
     }
-
 
 
 # Pour le rechargement du modèle

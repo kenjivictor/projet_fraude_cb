@@ -1,10 +1,14 @@
 services:
-  # Conteneur recepteur
+  # conteneur recepteur
   api-recepteur:
     build: .
     env_file: .env
+    networks:
+      - pynet
     volumes:
       - ./src:/app/src
+    depends_on:
+      - redis  # on évite que l'API plante si le conteneur redis n'est pas encore prêt
     command: ["uv" ,"run", "uvicorn" ,"src.API.streamrecepteur:app", "--host", "0.0.0.0" , "--port", "8000"]
     ports:
       - "${API_PORT}:${API_PORT}"
@@ -29,6 +33,8 @@ services:
     env_file: .env
     depends_on:
       - api-recepteur
+    networks:
+      - pynet
     environment:
       - API_URL=http://api-recepteur:8000
     command: ["uv" ,"run","streamlit", "run", "src/dashboard/dashboard.py", "--server.address", "0.0.0.0"]
@@ -36,3 +42,38 @@ services:
       - ./src:/app/src
     ports:
       - "${DASHBOARD_PORT}:${DASHBOARD_PORT}"
+
+
+  # conteneur redis
+  redis:
+    image: redis:latest             # téléchargement de l'image officielle 
+    container_name: redis-service
+    networks:
+      - pynet
+    env_file: .env
+    ports:
+      - "${REDIS_PORT}:6379"
+    volumes:        
+      - redis_data:/data        
+
+
+# conteneur worker BigQuery
+  worker-bigquery:
+      build: . #/api-recepteur
+      container_name: worker-bigquery
+      command: python src/API/worker_bq.py
+      depends_on:
+        - redis
+      networks:
+        - pynet
+      environment:
+        - REDIS_HOST=redis
+
+
+volumes:
+  redis_data:
+  
+ 
+networks:
+  pynet:
+    driver: bridge
