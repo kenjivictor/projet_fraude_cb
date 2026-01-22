@@ -1,7 +1,7 @@
 
-# Application de détection de fraude à la carte bancaire
+# Application de détection de fraude aux transactions bancaires en temps réel
 
-Ce projet est réalisé dans le cadre de la formation DATA ANALYST de la WILD CODE SCHOOL.
+Ce projet est un travail d'équipe réalisé dans le cadre de la formation DATA ANALYST de la WILD CODE SCHOOL.
 
 
 # Prérequis
@@ -15,7 +15,7 @@ Ce projet est réalisé dans le cadre de la formation DATA ANALYST de la WILD CO
 2. **Lancer l'environnement avec Docker Compose :**
 
     ```
-   docker-compose up --build
+   docker compose up --build
     ```
    # arrêter le processus
     ```
