@@ -71,14 +71,14 @@ async def recevoir_transaction(transaction: TransmissionRequest):
             "type": str(transaction.type),
             "amount": float(transaction.amount),
             "nameOrig": str(transaction.nameOrig),
-            "oldbalanceOrg": float(transaction.oldbalanceOrg), # Ajouté
-            "newbalanceOrig": float(transaction.newbalanceOrig), # Ajouté
+            "oldbalanceOrg": float(transaction.oldbalanceOrg), 
+            "newbalanceOrig": float(transaction.newbalanceOrig), 
             "nameDest": str(transaction.nameDest), 
-            "oldbalanceDest": float(transaction.oldbalanceDest), # Ajouté
-            "newbalanceDest": float(transaction.newbalanceDest), # Ajouté
-            "isFraud": int(transaction.isFraud),                # La donnée reçue (vérité)
-            "isFlaggedFraud": int(transaction.isFlaggedFraud),  # Ajouté
-            "verdict": verdict                                  # Ta prédiction
+            "oldbalanceDest": float(transaction.oldbalanceDest), 
+            "newbalanceDest": float(transaction.newbalanceDest), 
+            "isFraud": int(transaction.isFraud),                
+            "isFlaggedFraud": int(transaction.isFlaggedFraud),  
+            "verdict": verdict                                  
         }
     # convertir en texte pour Redis
     json_data = json.dumps(res_to_store)

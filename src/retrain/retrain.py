@@ -35,8 +35,8 @@ print("Nombre de lignes historiques :", historical_count)
 number_lines = df['nombre_lignes'][0]
 print(number_lines)
 
-# Condition d'avoir  ### ATTENTIOOOOOOOOOOOON A CHANGER EN PROD
-if number_lines >= historical_count : #+ 15000 :
+# Condition d'avoir  5000 nouvelles lignes
+if number_lines >= historical_count +5000 :
     print("Nouvelle données détectées, réentrainment du modèle en cours...")
     historical_count = number_lines +15000
     # on récuypere les données et on les retransforme
@@ -44,28 +44,33 @@ if number_lines >= historical_count : #+ 15000 :
     # Pas forcément utile dans notre démo mais important en prod
     
     retrain_sql = """
-    # AJUSTER ici pour recuperer sur la future base nouvelle requete
-        SELECT 
-    LEFT(nameOrig, 1) AS nameOrig,
-    LEFT(nameDest, 1) AS nameDest,
-    MOD(step, 24) AS hour,
-    type,
-    amount,
-    oldbalanceOrg,
-    oldbalanceDest,
-    isFraud
+    # On récupere toutes les fraudes
+    (SELECT 
+        LEFT(nameOrig, 1) AS nameOrig, LEFT(nameDest, 1) AS nameDest,
+        MOD(step, 24) AS hour, type, amount, oldbalanceOrg, oldbalanceDest, isFraud
     FROM `projet-fraude-paysim.paysim_raw.historical_transactions`
-    WHERE isFraud = 1
-    
+    WHERE isFraud = 1)
+
     UNION ALL
-    SELECT 
-    LEFT(nameOrig, 1) AS nameOrig, LEFT(nameDest, 1) AS nameDest,
-    MOD(step, 24) AS hour, type, amount, oldbalanceOrg, oldbalanceDest, isFraud
+
+    (SELECT 
+        LEFT(nameOrig, 1) AS nameOrig, LEFT(nameDest, 1) AS nameDest,
+        MOD(step, 24) AS hour, type, amount, oldbalanceOrg, oldbalanceDest, isFraud
+    FROM `projet-fraude-paysim.paysim_raw.predictions_transaction`
+    WHERE isFraud = 1)
+
+    UNION ALL
+
+    -- 2. On complète avec un échantillon de 500k transactions normales
+    (SELECT 
+        LEFT(nameOrig, 1) AS nameOrig, LEFT(nameDest, 1) AS nameDest,
+        MOD(step, 24) AS hour, type, amount, oldbalanceOrg, oldbalanceDest, isFraud
     FROM `projet-fraude-paysim.paysim_raw.historical_transactions`
     WHERE isFraud = 0
     ORDER BY RAND()
-    LIMIT 500000
+    LIMIT 500000)
     """
+    
     new_data = pandas_gbq.read_gbq(retrain_sql, project_id="projet-fraude-paysim")
 
     # X y
@@ -112,3 +117,6 @@ if number_lines >= historical_count : #+ 15000 :
         print(f"Nouveau modèle en prod : {resultat['modele_du']}")
     else:
         print(f"Echec de la mise à jour du modèle. Réponse API : {response.status_code}")
+
+else :
+    print("Pas assez de nouvelles données pour réentraîner le modèle.")
