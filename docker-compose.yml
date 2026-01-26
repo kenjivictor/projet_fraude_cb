@@ -5,7 +5,8 @@ services:
     build: .
     env_file: .env
     networks:
-      - pynet
+      pynet:
+        ipv4_address: 172.20.0.2
     volumes:
       - ./src:/app/src
     depends_on:
@@ -28,7 +29,8 @@ services:
       - ./data:/app/data
     command: ["uv", "run", "python", "src/API/streamenvoi.py"]
     networks:
-        - pynet
+      pynet:
+        ipv4_address: 172.20.0.3
 
 
   # streamlit
@@ -39,7 +41,8 @@ services:
     depends_on:
       - api-recepteur
     networks:
-      - pynet
+      pynet:
+        ipv4_address: 172.20.0.4
     environment:
       - API_URL=http://api-recepteur:8000
     command: ["uv" ,"run","streamlit", "run", "src/dashboard/dashboard.py", "--server.address", "0.0.0.0"]
@@ -59,7 +62,8 @@ services:
     restart: unless-stopped #prometheus restarts automatically if it crashes or the system reboots
     env_file: .env
     networks:
-      - pynet
+      pynet:
+        ipv4_address: 172.20.0.5
 
   grafana:
     image: grafana/grafana:latest
@@ -75,7 +79,8 @@ services:
       - grafana-storage:/var/lib/grafana
     restart: unless-stopped
     networks:
-      - pynet
+      pynet:
+        ipv4_address: 172.20.0.6
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
@@ -89,7 +94,8 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
     restart: unless-stopped
     networks:
-      - pynet
+      pynet:
+        ipv4_address: 172.20.0.7
 
 
   # conteneur redis
@@ -97,7 +103,8 @@ services:
     image: redis:latest             # téléchargement de l'image officielle 
     container_name: redis-service
     networks:
-      - pynet
+      pynet:
+        ipv4_address: 172.20.0.8
     env_file: .env
     ports:
       - "${REDIS_PORT}:6379"
@@ -107,22 +114,27 @@ services:
 
   # conteneur worker BigQuery
   worker-bigquery:
-      build: . #/api-recepteur
-      container_name: worker-bigquery
-      command: python src/API/worker_bq.py
-      depends_on:
-        - redis
-      networks:
-        - pynet
-      environment:
-        - REDIS_HOST=redis
+    build: . #/api-recepteur
+    container_name: worker-bigquery
+    command: python src/API/worker_bq.py
+    depends_on:
+      - redis
+    networks:
+      pynet:
+        ipv4_address: 172.20.0.9
+    environment:
+      - REDIS_HOST=redis
 
 
 volumes:
   redis_data:
   grafana-storage:
   
- 
+
 networks:
   pynet:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+          gateway: 172.20.0.1
