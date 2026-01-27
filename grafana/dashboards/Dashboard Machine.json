@@ -241,7 +241,8 @@
                 "value": 0
               }
             ]
-          }
+          },
+          "unit": "decbytes"
         },
         "overrides": []
       },
@@ -277,13 +278,13 @@
             "uid": "dfbbh9gkjsow0d"
           },
           "editorMode": "code",
-          "expr": "machine_",
+          "expr": "sum(container_memory_usage_bytes{image!=\"\"})",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Mémoire disponible",
+      "title": "Mémoire utilisée pour les containers",
       "type": "stat"
     },
     {
@@ -373,5 +374,5 @@
   "timezone": "browser",
   "title": "Dashboard Machine",
   "uid": "addjcmg",
-  "version": 3
+  "version": 4
 }
