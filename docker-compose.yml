@@ -5,7 +5,8 @@ services:
     build: .
     env_file: .env
     networks:
-      - pynet
+      pynet:
+        ipv4_address: 172.20.0.2
     volumes:
       - ./src:/app/src
     depends_on:
@@ -28,7 +29,8 @@ services:
       - ./data:/app/data
     command: ["uv", "run", "python", "src/API/streamenvoi.py"]
     networks:
-        - pynet
+      pynet:
+        ipv4_address: 172.20.0.3
 
 # retrain automatisation
   retrain-automation:
@@ -51,7 +53,8 @@ services:
     depends_on:
       - api-recepteur
     networks:
-      - pynet
+      pynet:
+        ipv4_address: 172.20.0.4
     environment:
       - API_URL=http://api-recepteur:8000
     command: ["uv", "run", "streamlit", "run", "src/dashboard/dashboard.py", "--server.address", "0.0.0.0", "--server.runOnSave", "true"]
@@ -71,7 +74,8 @@ services:
     restart: unless-stopped #prometheus restarts automatically if it crashes or the system reboots
     env_file: .env
     networks:
-      - pynet
+      pynet:
+        ipv4_address: 172.20.0.5
 
   grafana:
     image: grafana/grafana:latest
@@ -84,10 +88,16 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=${GF_ADMIN_PASSWORD:-admin}
       - GF_USERS_ALLOW_SIGN_UP=false
     volumes:
-      - grafana-storage:/var/lib/grafana
+      #- grafana-storage:/var/lib/grafana
+      # On injecte les fichiers de config
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      # On injecte le fichier JSON du dashboard
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
     restart: unless-stopped
     networks:
-      - pynet
+      pynet:
+        ipv4_address: 172.20.0.6
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
@@ -101,15 +111,32 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
     restart: unless-stopped
     networks:
-      - pynet
+      pynet:
+        ipv4_address: 172.20.0.7
 
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    ports:
+      - "9100:9100"
 
   # conteneur redis
   redis:
     image: redis:latest             # téléchargement de l'image officielle 
     container_name: redis-service
     networks:
-      - pynet
+      pynet:
+        ipv4_address: 172.20.0.8
     env_file: .env
     ports:
       - "${REDIS_PORT}:6379"
@@ -119,22 +146,27 @@ services:
 
   # conteneur worker BigQuery
   worker-bigquery:
-      build: . #/api-recepteur
-      container_name: worker-bigquery
-      command: python src/API/worker_bq.py
-      depends_on:
-        - redis
-      networks:
-        - pynet
-      environment:
-        - REDIS_HOST=redis
+    build: . #/api-recepteur
+    container_name: worker-bigquery
+    command: python src/API/worker_bq.py
+    depends_on:
+      - redis
+    networks:
+      pynet:
+        ipv4_address: 172.20.0.9
+    environment:
+      - REDIS_HOST=redis
 
 
 volumes:
   redis_data:
-  grafana-storage:
+#  grafana-storage:
   
- 
+
 networks:
   pynet:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+          gateway: 172.20.0.1

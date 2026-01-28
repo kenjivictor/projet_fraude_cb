@@ -74,19 +74,24 @@ docker logs -f retrain-automation
 
 ```
 fjbk-fraud-detection/
-├── data/               # Stockage des datasets bruts et transformés (ignorez via .gitignore)
-├── docs/               # Documentation technique et choix du dataset
-├── model/              # Stockage modèle, preprocessor
-├── notebooks/          # EDA et Visualisation 
-├── src/                # Code source modulaire
-│   ├── ingestion/      # Scripts pour lire les données 
-│   ├── API             # API
-│   ├── processing/     # Nettoyage et Feature Engineering 
-│   ├── models/         # Entraînement et évaluation (ML)
-│   └── dashboard/      # Interface Streamlit 
-├── tests/              # Tests unitaires pour le pipeline 
-├── requirements.txt    # Bibliothèques
-└── README.md           # Guide du projet et méthodologie
+├── data/                  # Stockage des datasets bruts et transformés (ignorer via .gitignore)
+├── docs/                  # Documentation technique et choix du dataset
+├── /grafana               # Configuration du monitoring avec Grafana
+│   ├── /dashboards        # Exports des dashboards depuis Grafana
+│   └── /provisioning      # Configuration du provisioning
+│       ├── /dashboards    # Fichiers de déclaration
+│       └── /datasources   # Fichiers de sources de données
+├── model/                 # Stockage modèle, preprocessor
+├── notebooks/             # EDA et Visualisation 
+├── src/                   # Code source modulaire
+│   ├── ingestion/         # Scripts pour lire les données 
+│   ├── API                # API
+│   ├── processing/        # Nettoyage et Feature Engineering 
+│   ├── models/            # Entraînement et évaluation (ML)
+│   └── dashboard/         # Interface Streamlit 
+├── tests/                 # Tests unitaires pour le pipeline 
+├── requirements.txt       # Bibliothèques
+└── README.md              # Guide du projet et méthodologie
 
 
 

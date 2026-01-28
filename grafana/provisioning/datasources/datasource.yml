@@ -1,0 +1,9 @@
+apiVersion: 1
+
+datasources:
+  - name: prometheus
+    type: prometheus
+    uid: dfbbh9gkjsow0d #unique ID por le processus prometheus
+    access: proxy
+    url: http://prometheus:9090  # Nom du service dans ton docker-compose
+    isDefault: true
