@@ -30,6 +30,18 @@ def metric_card(label, value, color="#f0f2f6"):
         unsafe_allow_html=True
     )
 
+def format_chiffres(n):
+    if n >= 1000000000:
+        return f"{n / 1000000000:.2f} Md€"
+    if n >= 1000000:
+        return f"{n / 1000000:.1f} M€"
+    if n >= 1000:
+        return f"{n / 1000:.1f} k€"
+    return f"{n} €"
+
+def format_metriques(n):
+    n= float(n)
+    return f"{n:,.0f}".replace(",", " ")
 
 # Page config
 st.set_page_config(
@@ -117,11 +129,11 @@ def page_stats():
 
                 col1, col2, col3 = st.columns(3)
                 with col1:
-                    metric_card("Nombre de transactions", nb_transactions,  color="#d4edda")
-                    metric_card("Montant total intercepté",f"{montant_total_intercepte} €", color="#fff3cd")
+                    metric_card("Nombre de transactions", format_metriques(nb_transactions),  color="#d4edda")
+                    metric_card("Montant total intercepté",f"{format_chiffres(montant_total_intercepte)}", color="#fff3cd")
                 with col2:
-                    metric_card("Nombre de fraudes", nb_fraudes_detectees, color="#f8d7da")
-                    metric_card("Montant moyen par fraude", f"{moyenne_par_fraude} €", color="#d1ecf1")
+                    metric_card("Nombre de fraudes", format_metriques(nb_fraudes_detectees), color="#f8d7da")
+                    metric_card("Montant moyen par fraude", f"{format_chiffres(moyenne_par_fraude)}", color="#d1ecf1")
                 with col3:
                     metric_card("Taux de fraudes", f"{pourcent_fraude} %", color="#e0c5d6")
                     if pourcent_fraude > 0.5: # Seuil arbitraire pour la démo
@@ -221,12 +233,12 @@ def page_performance_modele():
                 
             col1, col2 = st.columns(2)            
             with col1:
-                metric_card("VRAIS NÉGATIFS (SAINS)", m["vrais_negatifs"], color="#d4edda") 
-                metric_card("FAUX NÉGATIFS (RATÉS)", m["faux_negatifs"], color="#f8d7da")  
+                metric_card("VRAIS NÉGATIFS (SAINS)", format_metriques(m["vrais_negatifs"]), color="#d4edda") 
+                metric_card("FAUX NÉGATIFS (RATÉS)", format_metriques(m["faux_negatifs"]), color="#f8d7da")  
                 
             with col2:
-                metric_card("FAUX POSITIFS (ALERTES)", m["faux_positifs"], color="#fff3cd") 
-                metric_card("VRAIS POSITIFS (FRAUDES)", m["vrais_positifs"], color="#d1ecf1") 
+                metric_card("FAUX POSITIFS (ALERTES)", format_metriques(m["faux_positifs"]), color="#fff3cd") 
+                metric_card("VRAIS POSITIFS (FRAUDES)", format_metriques(m["vrais_positifs"]), color="#d1ecf1") 
 
             # affichage metriques
             st.divider()
