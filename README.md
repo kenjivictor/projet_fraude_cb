@@ -1,9 +1,9 @@
 
-# Détection de fraude bancaire en Temps Réel
+# Détection de fraude bancaire en temps réel
 
 Ce projet a été réalisé dans le cadre de la formation Data Analyst à la Wild Code School. Il simule un flux de transactions bancaires, les analyse via un modèle de Machine Learning (XGBoost) et monitore les performances en temps réel.
 
-## 👥 L'Équipe
+## L'Équipe
 * **Frédéric Bayen** - *Architecture MLOps, Bigquery, Streamlit, FastAPI & Automatisation*
 * **Kenji Victor** - *Streamlit, Grafana & Prometheus, FastAPI*
 * **Jean-Baptiste Leduc** - *Data Visualization, Streamlit Dashboards, Redis & Modélisation XGBoost*
@@ -23,9 +23,9 @@ L'application repose sur une architecture micro-services conteneurisée avec Doc
 |     (FastAPI)         | <---- |  Modèle XGBoost   |  |    
 +-----------------------+       +-------------------+  |
       |                                                |
-      | Résultats (LPUSH)                          |
+      | Résultats (LPUSH)                              |
       v                                                |
-[ STOCKAGE : Docker - Redis ]                          |
+[ STOCKAGE : Redis ]                                   |
 +------------------------------------------+           |
 |              REDIS (Cache)               |           |
 |  - flux_global (Archive BigQuery)        |           |
@@ -37,12 +37,12 @@ L'application repose sur une architecture micro-services conteneurisée avec Doc
       |                +-------------------+    [ MLOPS : Prefect ]
       |                |   worker_bq.py    |    +-----------------+
       |                | (Envoi BigQuery)  |--->|  retrain.py     |
-      |                +-------------------+    |  (Auto-Train)   |
+      |  Monitoring    +-------------------+    |  (Auto-Train)   |
       v                                         +-----------------+
       +----------------------------------------------------------+
-      |  Monitoring                                              |     
+      |                                                          |     
       v                                                          v
-[ SUPERVISION : Prometheus & Grafana ]             [ TABLEU DE BORD : Streamlit]
+[ SUPERVISION : Prometheus & Grafana ]             [ TABLEAU DE BORD : Streamlit]
 +------------------------------------------+    +------------------------------------------+
 | - Metrics système (CPU/RAM conteneurs)   |    | dashboard.py                             |
 | - Metrics business (Taux de fraude)      |    | - Dashboarding & Alerting Temps Réel     |
@@ -52,7 +52,7 @@ L'application repose sur une architecture micro-services conteneurisée avec Doc
 
 ---
 
-## Gestion des Données (Data Engineering)
+## Gestion des données
 
 Le projet utilise le dataset PaySim [(disponible ici sur Kaggle)](https://www.kaggle.com/datasets/mtalaltariq/paysim-data).
 
@@ -66,7 +66,7 @@ Cette méthode garantit que le modèle est testé sur des données qu'il n'a jam
 
 ---
 
-## Lancement Rapide
+## Lancement rapide
 
 **Prérequis**
 
@@ -88,7 +88,7 @@ Cette méthode garantit que le modèle est testé sur des données qu'il n'a jam
 
 
 
-**Accès aux Services**
+**Accès aux services**
 
  - **Dashboard Streamlit** : http://localhost:8501
 
@@ -138,7 +138,7 @@ Le conteneur retrain-automation surveille la table BigQuery via Prefect.
 
 ---
 
-## Maintenance et Réinitialisation
+## Maintenance et réinitialisation
 
 Pour remettre le projet à zéro :
 
@@ -150,7 +150,7 @@ Pour remettre le projet à zéro :
 
 ---
 
-## Problèmes rencontrés & Solutions apportées
+## Problèmes rencontrés & solutions apportées
 
 
 | Défi Technique | Impact | Solution apportée |
