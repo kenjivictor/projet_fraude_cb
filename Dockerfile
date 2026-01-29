@@ -12,6 +12,7 @@ RUN uv sync --locked --no-dev
 
 # copier le code source de l'ordinateur vers container et recrer arborescence dans container
 COPY src/ ./src/
+COPY gcp-key.json ./gcp-key.json
 
 # Ouvrir les port streamlit fastapi
 EXPOSE 8000 8501

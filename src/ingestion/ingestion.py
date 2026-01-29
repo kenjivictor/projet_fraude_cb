@@ -9,6 +9,7 @@ df = pd.read_csv("data/PaySim_historical.csv")
 
 # adresse de destination dans BigQuery
 destination = "projet-fraude-paysim.paysim_raw.historical_transactions"
+destination2 = "projet-fraude-paysim.paysim_raw.predictions_transaction"
 
 # Fonction pour envoyer les données vers BigQuery
 to_gbq(df, destination, project_id="projet-fraude-paysim", if_exists="replace")

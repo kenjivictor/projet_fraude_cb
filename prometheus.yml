@@ -1,0 +1,27 @@
+global:
+  scrape_interval: 5s  # Frequency of metric scraping
+
+scrape_configs:
+  - job_name: 'api-recepteur'
+    static_configs:
+      - targets: ['apirecepteur:8000']
+  
+  - job_name: 'stream-envoi'
+    static_configs:
+      - targets: ['streamenvoi:8000', 'streamenvoi:8501']
+  
+  - job_name: 'dashboard'
+    static_configs:
+      - targets: ['dashboard:8501']
+  
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+  
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
