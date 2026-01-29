@@ -192,13 +192,13 @@ Le conteneur retrain-automation surveille la table BigQuery via Prefect.
 
 ## Maintenance et réinitialisation
 
-Pour remettre le projet à zéro :
+Pour remettre le projet à zéro, tapez uniquement cette CLI  : ```python reset_projet.py```
 
-1. Vider Redis (les conteneurs doivent être allumés): ```docker exec -it redis-service redis-cli FLUSHALL```
+ - **Modèles** : Suppression de pipeline_latest.joblib et vidage des archives.
 
-2. Vider BigQuery : ```TRUNCATE TABLE paysim_raw.predictions_transaction```
+ - **État** : Réinitialisation du compteur last_count dans state.json.
 
-3. Reset l'automation : Mettre ```last_count``` à 0 dans le fichier ```state.json```.
+ - **Infrastructure** : Purge totale de Redis (via Docker) et des tables BigQuery.
 
 ---
 
