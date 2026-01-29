@@ -1,7 +1,180 @@
 
-# Application de détection de fraude aux transactions bancaires en temps réel
+# Détection de fraude bancaire en temps réel
 
-Ce projet est un travail d'équipe réalisé dans le cadre de la formation DATA ANALYST de la WILD CODE SCHOOL.
+Ce projet a été réalisé dans le cadre de la formation Data Analyst à la Wild Code School. Il simule un flux de transactions bancaires, les analyse via un modèle de Machine Learning (XGBoost) et monitore les performances en temps réel.
+
+## L'Équipe
+* **Frédéric Bayen** - *Architecture MLOps, Bigquery, Streamlit, FastAPI & Automatisation*
+* **Kenji Victor** - *Streamlit, Grafana & Prometheus, FastAPI*
+* **Jean-Baptiste Leduc** - *Data Visualization, Streamlit Dashboards, Redis & Modélisation XGBoost*
+
+## Architecture du Pipeline
+
+L'application repose sur une architecture micro-services conteneurisée avec Docker.
+
+```text
+[ SOURCE : Données CSV ]
+      |
+      | Lecture (streamenvoi.py)
+      v
+[ CERVEAU : Docker - API ] <---------------------------+
++-----------------------+       +-------------------+  |
+|  streamrecepteur.py   | ----> |  ML_XGBoost.ipynb |  | 
+|     (FastAPI)         | <---- |  Modèle XGBoost   |  |    
++-----------------------+       +-------------------+  |
+      |                                                |
+      | Résultats (LPUSH)                              |
+      v                                                |
+[ STOCKAGE : Redis ]                                   |
++------------------------------------------+           |
+|              REDIS (Cache)               |           |
+|  - flux_global (Archive BigQuery)        |           |
+|  - flux_streamlit (Affichage direct)     |           |
++------------------------------------------+           |
+      |                     |                          |
+      |                     | Archivage                |
+      |                     v                          |
+      |                +-------------------+    [ MLOPS : Prefect ]
+      |                |   worker_bq.py    |    +-----------------+
+      |                | (Envoi BigQuery)  |--->|  retrain.py     |
+      |  Monitoring    +-------------------+    |  (Auto-Train)   |
+      v                                         +-----------------+
+      +----------------------------------------------------------+
+      |                                                          |     
+      v                                                          v
+[ SUPERVISION : Prometheus & Grafana ]             [ TABLEAU DE BORD : Streamlit]
++------------------------------------------+    +------------------------------------------+
+| - Metrics système (CPU/RAM conteneurs)   |    | dashboard.py                             |
+| - Metrics business (Taux de fraude)      |    | - Dashboarding & Alerting Temps Réel     |
+| - Dashboarding & Alerting Temps Réel     |    | - EDA                                    |
++------------------------------------------+    +------------------------------------------+
+```
+
+---
+
+## Gestion des données
+
+Le projet utilise le dataset PaySim [(disponible ici sur Kaggle)](https://www.kaggle.com/datasets/mtalaltariq/paysim-data).
+
+Pour simuler un environnement de production réel, nous avons créé un script ```decoupe.py``` pour segmenter les données :
+
+ - **90% (Historique)** : Utilisés pour l'entraînement initial et stockés comme base de référence.
+
+ - **10% (Flux Stream)** : Isolés pour simuler l'envoi de transactions ligne par ligne par streamenvoi.py.
+
+Cette méthode garantit que le modèle est testé sur des données qu'il n'a jamais rencontrées lors de sa phase d'apprentissage initiale.
+
+---
+
+## Lancement rapide
+
+**Prérequis**
+
+   - Docker & Docker Compose installés.
+
+   - Clé Google Cloud ```gcp-key.json``` à la racine pour l'accès à BigQuery.
+
+   - Dataset ```PaySim_stream.csv``` et ```PaySim_historical.csv``` dans le dossier ./data/ récupérés grâce à ```decoupe.py```
+
+
+
+**Installation**
+
+1. **Cloner le projet.**
+
+2. **Lancer l'infrastructure :**
+
+      ```docker compose up --build```
+
+
+
+**Accès aux services**
+
+ - **Dashboard Streamlit** : http://localhost:8501
+
+ - **Documentation API** : http://localhost:8000/docs / http://localhost:8000/report / http://localhost:8000/reload
+
+ - **Monitoring Grafana** : http://localhost:3000
+
+ - **Prometheus** : http://localhost:9090
+
+ - **Processus de réentrainement** : ```docker logs -f retrain-automation```
+
+---
+
+## Automatisation MLOps
+
+Le conteneur retrain-automation surveille la table BigQuery via Prefect.
+
+ - Modularité : Le seuil de déclenchement (```min_rows_to_retrain```), le nombre de transactions récupéres sur BigQuery  (```limit_sql```) et l'intervalle de vérification (```check_interval_secondes```) sont modifiables sans redémarrage dans ```state.json```.
+
+ - Action : Dès que le seuil est atteint, le modèle est réentraîné sur les nouvelles données, archivé, et l'API est notifiée pour charger la nouvelle version instantanément.
+
+---
+
+## Structure du dossier
+
+```
+├── data/                  # Datasets (CSV historiques et flux stream)
+├── grafana/               # Configuration du monitoring
+│   ├── dashboards/        # Fichiers JSON des dashboards (RAM, Principal, etc.)
+│   └── provisioning/      # Configuration automatique des sources de données
+├── notebooks/             # Travail exploratoire et recherche
+│   ├── decoupe.py         # Script de split du dataset (90/10)
+│   ├── EDA_PaySim.ipynb   # Analyse exploratoire des données
+│   └── ML_XGBoost.ipynb   # Entraînement et tests du modèle
+├── src/                   # Code source applicatif
+│   ├── API/               # streamrecepteur (FastAPI), streamenvoi et worker_bq
+│   ├── dashboard/         # Interface utilisateur Streamlit (dashboard.py)
+│   ├── ingestion/         # Scripts de traitement des données
+│   ├── models/            # Fichiers .joblib (pipeline_latest, archives)
+│   └── retrain/           # Automatisation MLOps (retrain.py)
+├── docker-compose.yml     # Orchestration des services Docker
+├── Dockerfile             # Configuration de l'image Python/UV
+├── prometheus.yml         # Configuration de la collecte des métriques
+├── state.json             # État dynamique et configuration du réentraînement
+└── README.md              # Documentation du projet
+```
+
+---
+
+## Maintenance et réinitialisation
+
+Pour remettre le projet à zéro :
+
+1. Vider Redis (les conteneurs doivent être allumés): ```docker exec -it redis-service redis-cli FLUSHALL```
+
+2. Vider BigQuery : ```TRUNCATE TABLE paysim_raw.predictions_transaction```
+
+3. Reset l'automation : Mettre ```last_count``` à 0 dans le fichier ```state.json```.
+
+---
+
+## Problèmes rencontrés & solutions apportées
+
+
+| Défi Technique | Impact | Solution apportée |
+| :--- | :--- | :--- |
+| **Déséquilibre des classes** | Dataset à 0.13% de fraudes, biaisant fortement les prédictions initiales. | Utilisation de `scale_pos_weight` calculé dynamiquement sur le ratio réel Fraude/Normal lors du réentraînement. |
+| **Performance de l'entraînement** | RandomForest trop lent pour l'optimisation par GridSearch (estimé à plusieurs mois). | Passage à **XGBoost (CUDA/GPU)** et utilisation de **RandomizedSearch** pour une optimisation rapide. |
+| **Affichage Temps Réel** | Interface Streamlit statique par défaut, ne reflétant pas le flux entrant. | Boucle `while True` avec placeholders `st.empty()` pour rafraîchir les KPIs sans rechargement de page. |
+| **Saturation de Redis** | Réinitialisation du dashboard dû à chaque envoi sur BigQuery. | Mise en place d'un **double flux** : un flux persistant pour l'UI Streamlit et un autre pour l'archivage BigQuery. |
+| **Choix de l'Orchestrateur** | Airflow s'est révélé trop complexe et gourmand en ressources pour ce projet. | Pivot vers **Prefect**, plus léger, moderne et parfaitement adapté à notre architecture événementielle. |
+| **Apprentissage Docker** | Complexité des réseaux inter-conteneurs et des dépendances pour des novices. | Gestion rigoureuse des ordres de démarrage (`depends_on`) et isolation des réseaux internes (`networks`). |
+| **Synchronisation du Pipeline** | Risque de charger un modèle incomplet pendant l'écriture disque. | Système de **notification Push** : l'API recharge le modèle via `/reload` uniquement après confirmation de sauvegarde complète. |
+| **Data Leakage (Fuite)** | Score de performance artificiellement élevé (99.9%) via les variables `newbalance`. | **Suppression préventive** des variables "du futur" (`newbalanceOrig/Dest`). Le modèle n'utilise que le solde initial et le montant. |
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # Prérequis

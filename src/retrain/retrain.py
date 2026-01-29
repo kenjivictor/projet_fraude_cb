@@ -7,21 +7,12 @@ import os
 import requests
 from prefect import task, flow
 import time
+import json
 
 # Permet de récupérer la clé GCP
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "gcp-key.json"
 
 # Creation des taches Prefect
-@task(name = "Lire le compteur local")
-# 5726358 valeur initial
-def local_count() :
-    with open('src/retrain/last_count.txt', 'r') as f:
-        contenu = f.read()
-        historical_count = int(contenu)
-    print("Nombre de lignes historiques :", historical_count)
-    return historical_count
-    
-
 @task(name = "Vérifier les nouvelles données")
 def check_new_data() :
     sql = """
@@ -35,13 +26,17 @@ def check_new_data() :
 
 @task(name="Réentraînement du modèle")
 def retrain_model(nouveau_nombre_lignes):    
+    with open('state.json', 'r') as f:
+        state = json.load(f)
+    
+    limite_echantillon = state.get("limit_sql", 200000)
     try:
         pipeline = joblib.load("src/models/pipeline_latest.joblib")
         print("Dernier pipeline chargé pour mise à jour.")
     except:
         pipeline = joblib.load("src/models/pipeline_v1.joblib")
         print("Chargement de la V1 (première exécution).")
-    retrain_sql = """
+    retrain_sql = f"""
     # On récupere toutes les fraudes
     (SELECT 
         LEFT(nameOrig, 1) AS nameOrig, LEFT(nameDest, 1) AS nameDest,
@@ -66,9 +61,9 @@ def retrain_model(nouveau_nombre_lignes):
     FROM `projet-fraude-paysim.paysim_raw.historical_transactions`
     WHERE isFraud = 0
     ORDER BY RAND()
-    LIMIT 200000)
+    LIMIT {limite_echantillon})
     """
-    
+    #Limite = 200 000
     new_data = pandas_gbq.read_gbq(retrain_sql, project_id="projet-fraude-paysim")
 
     # X y
@@ -103,8 +98,9 @@ def retrain_model(nouveau_nombre_lignes):
     print(f"Archive créée : {archive_name}")
     print(f"Fichier 'latest' mis à jour.")
     
-    with open('src/retrain/last_count.txt', 'w') as f:
-        f.write(str(nouveau_nombre_lignes))
+    state["last_count"] = int(nouveau_nombre_lignes)
+    with open('state.json', 'w') as f:
+        json.dump(state, f, indent = 4)
     
     print(f"Compteur mis à jour : {nouveau_nombre_lignes} lignes.")
 
@@ -124,11 +120,14 @@ def notify_api():
 # Le chef d'orchestre
 @flow(name = "Réentrainement du modèle de détection de fraude")
 def start_pipeline() :
-    ancien = local_count()
+    with open('state.json', 'r') as f:
+        config = json.load(f)
+    seuil = config.get("min_rows_to_retrain", 5000)
+    ancien = config.get("last_count", 0)
     nouveau = check_new_data()
     print(f"Ancien: {ancien}, Nouveau: {nouveau}")
     
-    if nouveau >= ancien +5000 :
+    if nouveau >= ancien + seuil :
         print("On réentraîne.")
         retrain_model(nouveau)
         notify_api()
@@ -142,8 +141,12 @@ if __name__ == "__main__":
     while True:
         try:
             start_pipeline() 
+            with open('state.json', 'r') as f:
+                config = json.load(f)
+            
+            attente = config.get("check_interval_secondes", 120)
         except Exception as e:
             print(f"Erreur : {e}")
             
-        print("Attente de 2 minutes avant la prochaine vérification...")
-        time.sleep(120) 
+        print(f"Attente de {attente} secondes avant la prochaine vérification...")
+        time.sleep(attente) 

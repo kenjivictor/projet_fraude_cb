@@ -260,6 +260,7 @@ def page_performance_modele():
             
             time.sleep(1)
 
+    
 #------------Navigation des pages
 
 

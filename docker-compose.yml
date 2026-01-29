@@ -44,6 +44,7 @@ services:
         ipv4_address: 172.20.0.10
     volumes:
       - ./src:/app/src
+      - ./state.json:/app/state.json
     command: ["uv", "run", "python", "src/retrain/retrain.py"]
 
   # streamlit

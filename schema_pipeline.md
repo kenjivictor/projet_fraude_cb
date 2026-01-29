@@ -2,10 +2,10 @@
       |
       | (1) Lecture ligne par ligne
       v
-+-----------------------+       +-----------------------+
-|   streamenvoi.py      | <---> |     pointer.txt       |  (Sauvegarde la progression
-|   (L'Émetteur)        |       |    (Le Marque-page)   |   pour éviter les doublons)
-+-----------------------+       +-----------------------+
++-----------------------+  
+|   streamenvoi.py      | 
+|   (L'émetteur)        |    
++-----------------------+    
       |
       | (2) Envoi des données (Requête POST /predict)
       v
@@ -18,11 +18,11 @@
       | (3) Stockage des résultats (LPUSH)
       v
 [ STOCKAGE : Docker - Redis ]
-+-------------------------------------------------------+
-|                     REDIS (Cache)                     |
-|  - Liste "flux_global" : Toutes les transactions      |  (Données persistantes
-|  - Liste "liste_fraudes" : Uniquement les alertes     |   grâce au Volume Docker)
-+-------------------------------------------------------+
++--------------------------------------------------------------+
+|                     REDIS (Cache)                            |
+|  - Liste "flux_global" : Toutes les transactions             |  (Données persistantes
+|  - Liste "flux streamlit" : ASert a l'affichage Streamlit    |   grâce au Volume Docker)
++--------------------------------------------------------------+
       |                               |
       | (4a) Lecture (GET /report)     | (4b) Extraction (RPOP)
       v                               v

@@ -106,9 +106,6 @@ async def recevoir_transaction(transaction: TransmissionRequest):
     return {"prediction": verdict, "status": "success"}
 
 
-
-
-
 @app.get("/report")
 async def report():
     total_traitees = r.llen("flux_streamlit")
