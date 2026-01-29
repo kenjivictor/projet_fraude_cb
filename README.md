@@ -38,12 +38,13 @@ Pour garder un contrôle total sur la solution, nous avons déployé deux centre
  - **La supervision infrastructure (Grafana & Prometheus)** : Fidèle aux standards du Data Engineering, cette interface surveille la santé technique du système. Nous suivons en temps réel la consommation CPU/RAM de chaque conteneur et la latence de l'API pour garantir une haute disponibilité et des performances constantes sous la charge.
 
 
-**La Victoire sur la Fraude (Nos résultats)**
+**La Victoire sur la fraude**
 
 1. **Le Bouclier (Recall de 87 %)** : Nous interceptons désormais la grande majorité des tentatives de fraude.
 
-2. **Le Respect du Client (Précision de 63 %)** : Nous protégeons 99,4 % de nos clients honnêtes sans aucune friction, tout en ciblant avec précision les fraudeurs.
+2. **Le Respect du Client (Précision de 63 %)** : Nous protégeons 99,4 % de nos clients honnêtes, tout en ciblant avec précision les fraudeurs.
 
+---
 
 ## Architecture du Pipeline
 
