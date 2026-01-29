@@ -19,7 +19,7 @@ Ce projet est un travail d'équipe réalisé dans le cadre de la formation DATA 
     ```
    # arrêter le processus
     ```
-   docker-compose down
+   docker compose down
     ```
    # effacer le cache
     ```
