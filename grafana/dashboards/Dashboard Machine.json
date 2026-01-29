@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 7,
+  "id": 3,
   "links": [],
   "panels": [
     {
@@ -307,11 +307,11 @@
               },
               {
                 "color": "#EAB839",
-                "value": 70
+                "value": 60
               },
               {
                 "color": "red",
-                "value": 85
+                "value": 80
               }
             ]
           },
@@ -349,7 +349,7 @@
             "uid": "dfbbh9gkjsow0d"
           },
           "editorMode": "code",
-          "expr": "(1 - avg(rate(node_cpu_seconds_total{mode=\"idle\"}[1h])) ) * 100",
+          "expr": "(1 - avg(rate(node_cpu_seconds_total{mode=\"user\"}[30s])) ) * 100",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -374,5 +374,5 @@
   "timezone": "browser",
   "title": "Dashboard Machine",
   "uid": "addjcmg",
-  "version": 4
+  "version": 2
 }
