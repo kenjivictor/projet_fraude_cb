@@ -4,9 +4,9 @@
 Ce projet a été réalisé dans le cadre de la formation Data Analyst à la Wild Code School. Il simule un flux de transactions bancaires, les analyse via un modèle de Machine Learning (XGBoost) et monitore les performances en temps réel.
 
 ## 👥 L'Équipe
-* **Frédéric Bayen** - *Architecture MLOps, Bigquery & Automatisation*
-* **Kenji Victor** - *Streamlit, Grafana & Prometheus*
-* **Jean-Baptiste Leduc** - *Data Visualization, Dashboards, Redis & Modélisation XGBoost*
+* **Frédéric Bayen** - *Architecture MLOps, Bigquery, Streamlit, FastAPI & Automatisation*
+* **Kenji Victor** - *Streamlit, Grafana & Prometheus, FastAPI*
+* **Jean-Baptiste Leduc** - *Data Visualization, Streamlit Dashboards, Redis & Modélisation XGBoost*
 
 ## Architecture du Pipeline
 
@@ -40,7 +40,7 @@ L'application repose sur une architecture micro-services conteneurisée avec Doc
       |                +-------------------+    |  (Auto-Train)   |
       v                                         +-----------------+
       +----------------------------------------------------------+
-      | (4) Monitoring                                           |     
+      |  Monitoring                                              |     
       v                                                          v
 [ SUPERVISION : Prometheus & Grafana ]             [ TABLEU DE BORD : Streamlit]
 +------------------------------------------+    +------------------------------------------+
@@ -112,17 +112,6 @@ Le conteneur retrain-automation surveille la table BigQuery via Prefect.
 
 ---
 
-## Maintenance et Réinitialisation
-
-Pour remettre le projet à zéro :
-
-1. Vider Redis : ```docker exec -it redis-service redis-cli FLUSHALL```
-
-2. Vider BigQuery : ```TRUNCATE TABLE paysim_raw.predictions_transaction```
-
-3. Reset l'automation : Mettre ```last_count``` à 0 dans le fichier ```state.json```.
-
-
 ## Structure du dossier
 
 ```
@@ -146,6 +135,38 @@ Pour remettre le projet à zéro :
 ├── state.json             # État dynamique et configuration du réentraînement
 └── README.md              # Documentation du projet
 ```
+
+---
+
+## Maintenance et Réinitialisation
+
+Pour remettre le projet à zéro :
+
+1. Vider Redis : ```docker exec -it redis-service redis-cli FLUSHALL```
+
+2. Vider BigQuery : ```TRUNCATE TABLE paysim_raw.predictions_transaction```
+
+3. Reset l'automation : Mettre ```last_count``` à 0 dans le fichier ```state.json```.
+
+---
+
+## Problèmes rencontrés & Solutions apportées
+
+```
+| Défi Technique | Impact | Solution apportée |
+| :--- | :--- | :--- |
+| **Déséquilibre des classes** | Dataset à 0.13% de fraudes, biaisant fortement les prédictions initiales. | Utilisation de `scale_pos_weight` calculé dynamiquement sur le ratio réel Fraude/Normal lors du réentraînement. |
+| **Performance de l'entraînement** | RandomForest trop lent pour l'optimisation par GridSearch (estimé à plusieurs mois). | Passage à **XGBoost (CUDA/GPU)** et utilisation de **RandomizedSearch** pour une optimisation rapide. |
+| **Affichage Temps Réel** | Interface Streamlit statique par défaut, ne reflétant pas le flux entrant. | Boucle `while True` avec placeholders `st.empty()` pour rafraîchir les KPIs sans rechargement de page. |
+| **Saturation de Redis** | Réinitialisation du dashboard dû à chaque envoi sur BigQuery. | Mise en place d'un **double flux** : un flux persistant pour l'UI Streamlit et un autre pour l'archivage BigQuery. |
+| **Choix de l'Orchestrateur** | Airflow s'est révélé trop complexe et gourmand en ressources pour ce projet. | Pivot vers **Prefect**, plus léger, moderne et parfaitement adapté à notre architecture événementielle. |
+| **Apprentissage Docker** | Complexité des réseaux inter-conteneurs et des dépendances pour des novices. | Gestion rigoureuse des ordres de démarrage (`depends_on`) et isolation des réseaux internes (`networks`). |
+| **Synchronisation du Pipeline** | Risque de charger un modèle incomplet pendant l'écriture disque. | Système de **notification Push** : l'API recharge le modèle via `/reload` uniquement après confirmation de sauvegarde complète. |
+| **Data Leakage (Fuite)** | Score de performance artificiellement élevé (99.9%) via les variables `newbalance`. | **Suppression préventive** des variables "du futur" (`newbalanceOrig/Dest`). Le modèle n'utilise que le solde initial et le montant. |
+```
+
+
+
 
 
 
