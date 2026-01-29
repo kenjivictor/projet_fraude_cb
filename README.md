@@ -318,7 +318,7 @@ fjbk-fraud-detection/
 
 # redis 
 
-1. faire un uv lock afin de modifier le Dockerfile
+1. faire un uv lock afin de modifier le Dockerfil
 
 2. pour se connecter au conteneur redis:
    => docker exec -it redis-service redis-cli
