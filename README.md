@@ -8,6 +8,43 @@ Ce projet a été réalisé dans le cadre de la formation Data Analyst à la Wil
 * **Kenji Victor** - *Streamlit, Grafana & Prometheus, FastAPI*
 * **Jean-Baptiste Leduc** - *Data Visualization, Streamlit Dashboards, Redis & Modélisation XGBoost*
 
+## Vision Business & storytelling
+
+**Le constat : Une hémorragie financière**
+
+Imaginez une banque digitale en pleine expansion. Chaque jour, des milliers de clients effectuent des transactions cruciales depuis leur mobile. Cette ouverture numérique est devenue la cible privilégiée des réseaux criminels spécialisés dans le détournement de fonds. Pour notre institution, cette faille de sécurité se chiffrait par des pertes réelles de **plusieurs centaines de millions d'euros par an.**
+
+
+**La problématique : L'équilibre entre sécurité et fluidité**
+
+Le défi posé à notre équipe : stopper la fraude sans dégrader l'expérience utilisateur.
+
+ - **Rapidité absolue** : La décision (bloquer ou autoriser) doit tomber en quelques millisecondes pour ne pas ralentir le client.
+
+ - **Satisfaction Client** : Un "Faux Positif" (client honnête bloqué par erreur) est une catastrophe commerciale et a un coût financier non négligeable.
+
+
+**La Solution : Un système vivant et auto-adaptatif**
+
+Plutôt qu'un modèle statique, nous avons conçu une infrastructure évolutive. Grâce à notre pipeline MLOps, le système apprend en continu. Dès que de nouvelles typologies de fraude apparaissent, le modèle se réentraîne automatiquement pour s'adapter aux nouvelles menaces, garantissant une protection toujours à jour.
+
+
+**Le Pilotage**
+
+Pour garder un contrôle total sur la solution, nous avons déployé deux centres de commandement :
+
+ - Pour garder le contrôle, nous avons développé un **panneau de suivi Streamlit**. Il permet de visualiser les flux en temps réel, d'analyser les comportements suspects et de piloter la stratégie de sécurité de la banque. C'est ici que l'intelligence artificielle rencontre l'humaine.
+
+ - **La supervision infrastructure (Grafana & Prometheus)** : Fidèle aux standards du Data Engineering, cette interface surveille la santé technique du système. Nous suivons en temps réel la consommation CPU/RAM de chaque conteneur et la latence de l'API pour garantir une haute disponibilité et des performances constantes sous la charge.
+
+
+**La Victoire sur la Fraude (Nos résultats)**
+
+1. **Le Bouclier (Recall de 87 %)** : Nous interceptons désormais la grande majorité des tentatives de fraude.
+
+2. **Le Respect du Client (Précision de 63 %)** : Nous protégeons 99,4 % de nos clients honnêtes sans aucune friction, tout en ciblant avec précision les fraudeurs.
+
+
 ## Architecture du Pipeline
 
 L'application repose sur une architecture micro-services conteneurisée avec Docker.
@@ -102,6 +139,20 @@ Cette méthode garantit que le modèle est testé sur des données qu'il n'a jam
 
 ---
 
+## Performance du modèle (XGBoost)
+
+Compte tenu du fort déséquilibre des données (99,4 % de transactions saines vs 0,6 % de fraudes), l'Accuracy (précision globale) n'est pas un indicateur pertinent. Nous nous concentrons sur la capacité du modèle à détecter les fraudes réelles.
+
+**Résultats sur le Test Set de la v1**
+
+Métrique|Valeur|Interprétation
+| :--- | :--- | :--- |
+| **Recall** | 87 % | Le modèle identifie avec succès 87 % des tentatives de fraude. | 
+|** Précision ** | 63 % | Lorsqu'on prédit une fraude, elle est réelle dans 63 % des cas. | 
+|** F1-Score ** | 0.73 | Un excellent équilibre pour un système de détection en temps réel. | 
+
+---
+
 ## Automatisation MLOps
 
 Le conteneur retrain-automation surveille la table BigQuery via Prefect.
@@ -155,7 +206,7 @@ Pour remettre le projet à zéro :
 
 | Défi Technique | Impact | Solution apportée |
 | :--- | :--- | :--- |
-| **Déséquilibre des classes** | Dataset à 0.13% de fraudes, biaisant fortement les prédictions initiales. | Utilisation de `scale_pos_weight` calculé dynamiquement sur le ratio réel Fraude/Normal lors du réentraînement. |
+| **Déséquilibre des classes** | Dataset à 0.6% de fraudes, biaisant fortement les prédictions initiales. | Utilisation de `scale_pos_weight` calculé dynamiquement sur le ratio réel Fraude/Normal lors du réentraînement. |
 | **Performance de l'entraînement** | RandomForest trop lent pour l'optimisation par GridSearch (estimé à plusieurs mois). | Passage à **XGBoost (CUDA/GPU)** et utilisation de **RandomizedSearch** pour une optimisation rapide. |
 | **Affichage Temps Réel** | Interface Streamlit statique par défaut, ne reflétant pas le flux entrant. | Boucle `while True` avec placeholders `st.empty()` pour rafraîchir les KPIs sans rechargement de page. |
 | **Saturation de Redis** | Réinitialisation du dashboard dû à chaque envoi sur BigQuery. | Mise en place d'un **double flux** : un flux persistant pour l'UI Streamlit et un autre pour l'archivage BigQuery. |
