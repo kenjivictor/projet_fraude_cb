@@ -86,7 +86,7 @@ L'application repose sur une architecture micro-services conteneurisée avec Doc
 +------------------------------------------+    +------------------------------------------+
 | - Metrics système (CPU/RAM conteneurs)   |    | dashboard.py                             |
 | - Metrics business (Taux de fraude)      |    | - Dashboarding & Alerting Temps Réel     |
-| - Dashboarding & Alerting Temps Réel     |    | - EDA                                    |
+| - Metrics FASTAPI                        |    | - EDA                                    |
 +------------------------------------------+    +------------------------------------------+
 ```
 
@@ -108,7 +108,7 @@ Cette méthode garantit que le modèle est testé sur des données qu'il n'a jam
 
 ## Lancement rapide
 
-**Prérequis**
+### Prérequis
 
    - **Docker** & Docker Compose installés.
 
@@ -117,46 +117,46 @@ Cette méthode garantit que le modèle est testé sur des données qu'il n'a jam
 
 
 
-**Installation**
+### Installation
 
 1. **Cloner le projet.**
 
 2. **Télécharger le dataset PaySim [(disponible ici sur Kaggle)](https://www.kaggle.com/datasets/mtalaltariq/paysim-data).** et le placer dans ```./data/```
 
 
-2. **Copier le template des variables d'environnement**
+3. **Copier le template des variables d'environnement**
 
       ```cp .env-dist .env```
 
       -> Remplir le .env avec vos variables d'environnement
 
-3. **Initialisation du projet (uv)**
+4. **Initialisation du projet (uv)**
 
       ```uv sync```
 
-4. **Découpe du dataset**
+5. **Découpe du dataset**
 
       ```uv run src/notebooks/decoupe.py```
    
       -> Dataset ```PaySim_stream.csv``` et ```PaySim_historical.csv``` créés dans le dossier ./data/
 
-5. **Générer la clé Json Bigquery**
+6. **Générer la clé Json Bigquery**
 
       - Activer l'API BigQuery, et créer un compte de service avec les rôles BigQuery Admin et Storage Admin.
 
       - Générer une clé JSON, la nommer ```gcp-key.json``` et la placer à la racine du projet.
 
-5. **Ingestion des données historiques dans BigQuery**
+7. **Ingestion des données historiques dans BigQuery**
 
       ```uv run ingestion/ingestion.py```
 
-6. **Lancer l'infrastructure :**
+8. **Lancer l'infrastructure :**
 
       ```docker compose up --build```
 
+---
 
-
-**Accès aux services**
+### Accès aux services
 
  - **Dashboard Streamlit** : http://localhost:8501
 
