@@ -135,9 +135,9 @@ async def reload_model():
         # On tente de charger, si ça rate on passe dans le 'except'
         new_pipeline = joblib.load('src/models/pipeline_latest.joblib')
         pipeline = new_pipeline
-        timestamp = os.path.getmtime('src/models/pipeline_latest.joblib')
-        date_formatee = datetime.fromtimestamp(timestamp).strftime('%d/%m %H:%M:%S')
-        return {"status": "success", "modele_du": date_formatee}
+        mtime = os.path.getmtime('src/models/pipeline_latest.joblib')
+        date_formatee = datetime.fromtimestamp(mtime).strftime('%d/%m/%Y %H:%M:%S')
+        return {"status": "success", "modele_du": date_formatee, "version_id": mtime}
     except Exception as e:
         print(f"Erreur rechargement : {e}")
         return {"status": "error", "message": "Conservation de l'ancien modèle"}

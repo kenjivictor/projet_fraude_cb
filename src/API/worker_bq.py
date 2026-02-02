@@ -52,6 +52,8 @@ while True:
 
         if errors == []:
             print(f"Succès : {len(paquet_a_envoyer)} lignes insérées.", flush=True)
+            r.set("last_insert_count", len(paquet_a_envoyer))
+            r.set("last_insert_time", time.time())
         else:
             print("ERREUR GOOGLE :", flush=True)
             print(errors, flush=True)
