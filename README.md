@@ -1,5 +1,5 @@
 
-# Détection de fraude bancaire en temps réel
+# Détection de fraudes bancaires en temps réel
 
 Ce projet a été réalisé dans le cadre de la formation Data Analyst à la Wild Code School. Il simule un flux de transactions bancaires, les analyse via un modèle de Machine Learning (XGBoost) et monitore les performances en temps réel.
 
@@ -10,12 +10,12 @@ Ce projet a été réalisé dans le cadre de la formation Data Analyst à la Wil
 
 ## Vision Business & storytelling
 
-**Le constat : Une hémorragie financière**
+### Le constat : Une hémorragie financière
 
 Imaginez une banque digitale en pleine expansion. Chaque jour, des milliers de clients effectuent des transactions cruciales depuis leur mobile. Cette ouverture numérique est devenue la cible privilégiée des réseaux criminels spécialisés dans le détournement de fonds. Pour notre institution, cette faille de sécurité se chiffrait par des pertes réelles de **plusieurs centaines de millions d'euros par an.**
 
 
-**La problématique : L'équilibre entre sécurité et fluidité**
+### La problématique : L'équilibre entre sécurité et fluidité
 
 Le défi posé à notre équipe : stopper la fraude sans dégrader l'expérience utilisateur.
 
@@ -24,12 +24,12 @@ Le défi posé à notre équipe : stopper la fraude sans dégrader l'expérience
  - **Satisfaction Client** : Un "Faux Positif" (client honnête bloqué par erreur) est commercialement problématique et a un coût financier non négligeable.
 
 
-**La solution : Un système vivant et auto-adaptatif**
+### La solution : Un système vivant et auto-adaptatif
 
 Plutôt qu'un modèle statique, nous avons conçu une infrastructure évolutive. Grâce à notre pipeline MLOps, le système apprend en continu. Dès que de nouvelles typologies de fraude apparaissent, le modèle se réentraîne automatiquement pour s'adapter aux nouvelles menaces, garantissant une protection toujours à jour.
 
 
-**Le pilotage**
+### Le pilotage
 
 Pour garder un contrôle total sur la solution, nous avons déployé deux centres de commandement :
 
@@ -38,7 +38,7 @@ Pour garder un contrôle total sur la solution, nous avons déployé deux centre
  - **La supervision infrastructure (Grafana & Prometheus)** : Cette interface surveille la santé technique du système. Nous suivons en temps réel la consommation CPU/RAM de chaque conteneur et la latence de l'API pour garantir une haute disponibilité et des performances constantes sous la charge.
 
 
-**Nos résultats sur la fraude**
+### Nos résultats sur la fraude
 
 1. **Le Bouclier (Recall de 87 %)** : Nous interceptons désormais la grande majorité des tentatives de fraude.
 
