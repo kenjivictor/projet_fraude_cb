@@ -5,6 +5,7 @@ import pandas as pd
 import requests
 import os
 import time
+import redis
 import plotly.express as px
 
 # Page conffig
@@ -29,6 +30,9 @@ def metric_card(label, value, color="#f0f2f6"):
         """,
         unsafe_allow_html=True
     )
+
+# Connexion à Redis
+r_dash = redis.Redis(host="redis-service", port=6379, db=0, decode_responses=True)
 
 def format_chiffres(n):
     if n >= 1000000000:
@@ -87,9 +91,22 @@ with st.sidebar:
 
 def page_stats():
     placeholder1 = st.empty()
-
+    if "last_processed_time" not in st.session_state:
+        st.session_state.last_processed_time = 0
+        
+        
     while True:
-        report = get_report()
+        last_count = r_dash.get("last_insert_count")
+        last_time = r_dash.get("last_insert_time")
+
+        if last_count and last_time:
+            last_time = float(last_time)
+            if last_time > st.session_state.last_processed_time:
+                st.toast(f"{last_count} transactions envoyées à BigQuery !", icon="✅")
+                st.session_state.last_processed_time = last_time
+        
+        
+        report = get_report()            
         if report is not None:
             df = pd.DataFrame(report['details'])
             
@@ -137,7 +154,7 @@ def page_stats():
                 with col3:
                     metric_card("Taux de fraudes", f"{pourcent_fraude} %", color="#e0c5d6")
                     if pourcent_fraude > 0.5: # Seuil arbitraire pour la démo
-                     status_alerte = "🔴 CRITIQUE"
+                        status_alerte = "🔴 CRITIQUE"
                     elif pourcent_fraude > 0:
                         status_alerte = "🟠 ACTIF"
                     else:
@@ -199,15 +216,27 @@ def page_stats():
 
 def page_performance_modele():
     placeholder2 = st.empty()
-    reload_data = get_reload()
+    if "current_version_id" not in st.session_state:
+        st.session_state.current_version_id = None
     
     while True:
+        reload_data = get_reload()
+        if reload_data and reload_data.get("status") == "success":
+            new_id = reload_data.get("version_id")
+            
+            if st.session_state.current_version_id is not None and new_id != st.session_state.current_version_id:
+                st.toast(f"Modèle XGBoost réentraîné ! ({reload_data['modele_du']})", icon="✅")
+            st.session_state.current_version_id = new_id
+        
+        
         with placeholder2.container():
-            coltitle1, coltitle2, coltitle3 = st.columns([3.5,6,1])
+            coltitle1, coltitle2, coltitle3 = st.columns([3.5,6,2])
             with coltitle2:
                 st.title("Performance du modèle")
+            coltitlee1, coltitlee2, coltitlee3 = st.columns([5,6,6])
+            with coltitlee2:
                 if reload_data and reload_data.get("status") == "success":
-                    st.caption(f"Modèle actif mis à jour le : **{reload_data['modele_du']}**")
+                    st.info(f"🛡️ **Modèle en production** | Version du : {reload_data['modele_du']}")
                 
             st.divider()
             

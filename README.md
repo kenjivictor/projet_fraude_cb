@@ -46,7 +46,24 @@ Pour garder un contrôle total sur la solution, nous avons déployé deux centre
 
 3. **L'efficacité des alertes (Précision de 63 %)** : Sur l'ensemble des transactions bloquées pour suspicion, près de 2 sur 3 sont réellement des fraudes. Ce score élevé permet aux équipes de sécurité de se concentrer sur des menaces hautement probables plutôt que de traiter un volume ingérable de fausses alertes.
 
+
+### Note sur la simulation de la "Vérité Terrain"
+
+Dans ce projet, les transactions envoyées vers BigQuery incluent la valeur réelle de fraude.
+
+Pourquoi ce choix ? Dans un environnement bancaire réel, il existe un décalage temporel : le modèle prédit une fraude à l'instant T, et la confirmation réelle (le "retour client" ou le signalement) arrive plus tard.
+
+Pour les besoins de la démonstration en temps réel et pour permettre au cycle d'auto-apprentissage (MLOps) de fonctionner de manière fluide, nous avons "compressé le temps". Nous simulons ce retour d'information instantanément afin de démontrer la capacité du pipeline à :
+
+ - Détecter l'apparition de nouveaux patterns.
+
+ - Déclencher un réentraînement automatique basé sur des données vérifiées.
+
+- Comparer immédiatement la prédiction du modèle avec la réalité pour calculer les métriques de performance.
+
+
 ---
+
 
 ## Architecture du Pipeline
 
