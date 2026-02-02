@@ -22,7 +22,10 @@ destination_pred = f"{PROJECT_ID}.{DATASET_ID}.predictions_transaction"
 # Envoi de l'historique
 to_gbq(df, destination_hist, project_id=PROJECT_ID, if_exists="replace")
 
+df_pred_schema = df.head(0).copy()
+df_pred_schema['verdict'] = ""
+
 # Création de la table de prédictions vide
-to_gbq(df.head(0), destination_pred, project_id=PROJECT_ID, if_exists="skip"
+to_gbq(df_pred_schema.head(0), destination_pred, project_id=PROJECT_ID, if_exists="append")
 
 print("Historique des transactions importé dans BigQuery avec succès.")

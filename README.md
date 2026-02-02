@@ -110,19 +110,10 @@ Cette méthode garantit que le modèle est testé sur des données qu'il n'a jam
 
 **Prérequis**
 
-   - Docker & Docker Compose installés.
+   - **Docker** & Docker Compose installés.
 
-   - **BigQuery** : - Créer un projet sur la Console Google Cloud.
+   - **BigQuery** : Créer un projet sur la Console Google Cloud.
 
-                    - Activer l'API BigQuery.
-
-                    - Créer un Dataset nommé paysim_raw (ou celui défini dans votre .env).
-
-                    - Créer un compte de service avec les rôles BigQuery Admin et Storage Admin.
-
-                    - Générer une clé JSON, la nommer ```gcp-key.json``` et la placer à la racine du projet.
-
-                    - Remplir le .env avec votre GCP_PROJECT_ID.
 
 
 
@@ -135,23 +126,31 @@ Cette méthode garantit que le modèle est testé sur des données qu'il n'a jam
 
 2. **Copier le template des variables d'environnement**
 
-      ```cp env-dist .env```
+      ```cp .env-dist .env```
+
+      -> Remplir le .env avec vos variables d'environnement
 
 3. **Initialisation du projet (uv)**
 
       ```uv sync```
 
-3. **Découpe du dataset**
+4. **Découpe du dataset**
 
       ```uv run src/notebooks/decoupe.py```
    
-   -> Dataset ```PaySim_stream.csv``` et ```PaySim_historical.csv``` créés dans le dossier ./data/
+      -> Dataset ```PaySim_stream.csv``` et ```PaySim_historical.csv``` créés dans le dossier ./data/
 
-4. **Ingestion des données historiques dans BigQuery**
+5. **Générer la clé Json Bigquery**
 
-      ```uv run src/ingestion/ingestion.py```
+      - Activer l'API BigQuery, et créer un compte de service avec les rôles BigQuery Admin et Storage Admin.
 
-5. **Lancer l'infrastructure :**
+      - Générer une clé JSON, la nommer ```gcp-key.json``` et la placer à la racine du projet.
+
+5. **Ingestion des données historiques dans BigQuery**
+
+      ```uv run ingestion/ingestion.py```
+
+6. **Lancer l'infrastructure :**
 
       ```docker compose up --build```
 

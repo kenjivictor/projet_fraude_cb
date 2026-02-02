@@ -4,6 +4,12 @@ import json
 import subprocess
 import time
 from google.cloud import bigquery
+from dotenv import load_dotenv
+
+load_dotenv()
+
+PROJECT_ID = os.getenv("GCP_PROJECT_ID")
+DATASET_ID = os.getenv("GCP_DATASET")
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "gcp-key.json"
 modele_latest_path = 'src/models/pipeline_latest.joblib'
@@ -50,7 +56,7 @@ print("Arrêt du conteneur redis")
 try :
     print("Réinitialisation des tables BigQuery")
     client = bigquery.Client()
-    reset_sql = """TRUNCATE TABLE `projet-fraude-paysim.paysim_raw.predictions_transaction`;"""
+    reset_sql = f"""TRUNCATE TABLE `{PROJECT_ID}.{DATASET_ID}.predictions_transaction`;"""
     query = client.query(reset_sql)
     query.result()
     
