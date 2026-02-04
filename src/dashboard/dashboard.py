@@ -363,7 +363,7 @@ def page_eda():
     st.write("---")
 
     #---------------création des onglets
-    onglet_projet, onglet_stack, onglet_eda, onglet_flux_de_donnees, onglet_equipe = st.tabs(["Le projet", "La Stack", "L'analyse (EDA)", "Flux de données", "L'Équipe",])
+    onglet_projet, onglet_stack, onglet_eda, onglet_flux_de_donnees, onglet_equipe = st.tabs(["Le projet", "La tack", "L'analyse (EDA)", "Flux de données", "L'équipe",])
     
     with onglet_projet:
         
@@ -625,7 +625,7 @@ suggère l'existence d'un **plafond transactionnel** fréquemment atteint par le
     with onglet_flux_de_donnees:
         (st.write(""))
         with st.container(border=True, horizontal_alignment="center"):   
-            st.markdown("### Flux de données", text_alignment="center", unsafe_allow_html=True)
+            st.markdown("### <u> Flux de données</u>", text_alignment="center", unsafe_allow_html=True)
             st.write("")
             st.markdown("#### Architecture du pipeline de détection de fraude en temps réel", text_alignment="center", unsafe_allow_html=True)
             st.image("images/pipeline.png", width=1000)
@@ -634,33 +634,37 @@ suggère l'existence d'un **plafond transactionnel** fréquemment atteint par le
 
     with onglet_equipe:
         (st.write(""))   
-        col1title, col2title, col3title = st.columns([5,6,1])
+        col1title, col2title, col3title = st.columns([6,6,1])
         with col2title:
-            st.markdown("### L'équipe", unsafe_allow_html=True)
+            st.markdown("### <u>L'équipe</u>", unsafe_allow_html=True)
         (st.write("")) 
         (st.write("")) 
         col1, col2, col3 = st.columns(3)
         with col1:
             with st.container(border=True):
-                _, centre, _ = st.columns([1.5, 2, 1])
+                _, centre, _ = st.columns([1, 2, 1])
                 with centre:
                     st.image("images/kenji_victor.png", width=250)
                     st.markdown("**Kenji VICTOR**  \n ###### Streamlit, Grafana & Prometheus, FastAPI  \n")
                     st.markdown("###### [LinkedIn](https://www.linkedin.com/in/kenji-victor/)")
+                    st.write("")
+                    st.write("")
         with col2: 
             with st.container(border=True):     
-                _, centre, _ = st.columns([1.5, 2, 1])
+                _, centre, _ = st.columns([1, 2, 1])
                 with centre:
                     st.image("images/frederic_bayen.png", width=250)
                     st.markdown("**Frédéric BAYEN**  \n ###### Architecture MLOps, Bigquery, Streamlit, FastAPI & Automatisation \n")
                     st.markdown("###### [LinkedIn](https://www.linkedin.com/in/fr%C3%A9d%C3%A9ric-bayen/)")
+                    st.write("")
         with col3: 
             with st.container(border=True):     
-                _, centre, _ = st.columns([1.5, 2, 1])
+                _, centre, _ = st.columns([1, 2, 1])
                 with centre:
                     st.image("images/jb_leduc.jpg", width=250)
                     st.markdown("**Jean-Baptiste LEDUC**  \n ###### Data Visualization, Streamlit Dashboards, Buffer Redis, Modélisation XGBoost \n")
                     st.markdown("###### [LinkedIn](https://www.linkedin.com/in/leduc-jean-baptiste/)")
+                    st.write("")
 
 #------------Navigation des pages
 
