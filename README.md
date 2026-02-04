@@ -69,6 +69,9 @@ Pour les besoins de la démonstration en temps réel et pour permettre au cycle 
 
 L'application repose sur une architecture micro-services conteneurisée avec Docker.
 
+![Stack Technique](images/resume_stack.png)
+
+
 ```text
 [ SOURCE : PaySim_stream.csv ]
       |
