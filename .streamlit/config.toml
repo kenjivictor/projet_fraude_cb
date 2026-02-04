@@ -1,0 +1,6 @@
+[theme]
+primaryColor = "#779ecb" # Bleu pastel
+backgroundColor = "#fdfdfd" # Blanc cassé
+secondaryBackgroundColor = "#f0f2f6" # Gris très clair pour les menus
+textColor = "#262730"
+font = "sans serif"

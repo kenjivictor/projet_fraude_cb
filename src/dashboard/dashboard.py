@@ -7,12 +7,17 @@ import os
 import time
 import redis
 import plotly.express as px
+from pathlib import Path
 
 # Page conffig
 st.set_page_config(
     page_title="Détection de Fraude",
     layout="wide", 
     initial_sidebar_state="expanded")
+
+# CSS 
+st.markdown(f"<style>{Path('src/dashboard/assets/style.css').read_text()}</style>", unsafe_allow_html=True)
+
 
 def metric_card(label, value, color="#f0f2f6"):
     st.markdown(
@@ -81,8 +86,8 @@ list_pourcent_fraude = []
 with st.sidebar:
     page_selection = option_menu(
         menu_title="Navigation", 
-        options=["Tableau de bord", "Performance du modèle"],
-        icons=["speedometer2", "graph-up-arrow"], 
+        options=["Tableau de bord", "Performance du modèle", "Le projet"],
+        icons=["speedometer2", "graph-up-arrow", "book"], 
         menu_icon="cast")
     st.page_link("http://localhost:3000/", label = "Grafana métrics 🏃‍➡️")
     
@@ -161,7 +166,7 @@ def page_stats():
                         status_alerte = "🟢 CALME"
 
                     metric_card(label="État du Système", value=status_alerte)
-  # affichage des détails des fraudes détectées
+                # affichage des détails des fraudes détectées
                 st.divider()
                 if nb_fraudes_detectees >0:
                     col1_tina, col2_tina, col3_tina = st.columns([3,3,2])
@@ -212,10 +217,13 @@ def page_stats():
         time.sleep(1)
         
         
+        
 #--------Page performance modèle
 
 def page_performance_modele():
     placeholder2 = st.empty()
+    
+
     if "current_version_id" not in st.session_state:
         st.session_state.current_version_id = None
     
@@ -302,11 +310,274 @@ def page_performance_modele():
             time.sleep(1)
 
     
-#------------Navigation des pages
+##-------------------------------- EDA ----------------------------
+def page_eda():
+    title = "Présentation du projet"
+    st.title(title, text_alignment="center")
 
+    #---------------création des onglets
+    onglet_projet, onglet_stack, onglet_eda, onglet_flux_de_donnees, onglet_equipe = st.tabs(["Le projet", "La Stack", "L'analyse (EDA)", "Flux de données", "L'Équipe",])
+    
+    with onglet_projet:
+        
+        (st.write(""))  
+        col1title, col2title, col3title = st.columns([4.5,6,1])
+        with col2title:
+            st.markdown("### <u> Vision Business & storytelling</u>", unsafe_allow_html=True)
+        (st.write(""))
+        
+        with st.expander("**Le constat : Une hémorragie financière**"): 
+            st.markdown("""
+            Imaginez une banque digitale en pleine expansion. Chaque jour, des milliers de clients effectuent des transactions cruciales depuis leur mobile. Cette ouverture numérique est devenue la cible privilégiée des réseaux criminels spécialisés dans le détournement de fonds. Pour notre institution, cette faille de sécurité se chiffrait par des pertes réelles de plusieurs centaines de millions d'euros par an.
+            """)
+        
+        with st.expander("**La problématique : L'équilibre entre sécurité et fluidité**"):
+            st.markdown("""
+Le défi posé à notre équipe : stopper la fraude sans dégrader l'expérience utilisateur.
+
+* **Rapidité** : La décision (bloquer ou autoriser) doit être rendue en quelques millisecondes pour ne pas ralentir le client.
+* **Satisfaction Client** : Un "Faux Positif" (client honnête bloqué par erreur) est commercialement problématique et a un coût financier non négligeable.
+    """)
+            
+        with st.expander("**La solution : Une architecture innovante de détection en temps réel**"):
+            st.markdown("""
+Plutôt qu'un modèle statique, nous avons conçu une infrastructure évolutive.
+
+Grâce à notre pipeline MLOps, le système apprend en continu.
+Dès que de nouvelles typologies de fraude apparaissent, le modèle se réentraîne automatiquement pour s'adapter aux nouvelles menaces, garantissant une protection toujours à jour.""")
+            
+        with st.expander("**Les résultats : Une efficacité prouvée**"):
+            st.markdown("""
+* **Le Bouclier (Recall de 87 %)** : Nous interceptons désormais la grande majorité des tentatives de fraude.
+
+* **La fluidité client (Spécificité de 99,4 %)** : Nous garantissons une expérience sans problème. 99,4 % des transactions légitimes sont validées instantanément, minimisant ainsi le mécontentement client.
+
+* **L'efficacité des alertes (Précision de 63 %)** : Sur l'ensemble des transactions bloquées pour suspicion, près de 2 sur 3 sont réellement des fraudes. Ce score élevé permet aux équipes de sécurité de se concentrer sur des menaces hautement probables plutôt que de traiter un volume ingérable de fausses alertes.""")
+            
+        with st.expander('**Note sur la simulation de la "Vérité Terrain"**'):   
+            st.markdown("""Dans ce projet, les transactions envoyées vers BigQuery incluent la valeur réelle de fraude.
+
+Pourquoi ce choix ? Dans un environnement bancaire réel, il existe un décalage temporel : le modèle prédit une fraude à l'instant T, et la confirmation réelle (le "retour client" ou le signalement) arrive plus tard.
+
+Pour les besoins de la démonstration en temps réel et pour permettre au cycle d'auto-apprentissage (MLOps) de fonctionner de manière fluide, nous avons "compressé le temps". Nous simulons ce retour d'information instantanément afin de démontrer la capacité du pipeline à :
+
+* Détecter l'apparition de nouveaux patterns.
+
+* Déclencher un réentraînement automatique basé sur des données vérifiées.
+
+* Comparer immédiatement la prédiction du modèle avec la réalité pour calculer les métriques de performance.""")
+
+
+            
+        st.write("---")
+        
+        col1title, col2title, col3title = st.columns([5,6,1])
+        with col2title:
+            st.markdown("### <u>Dataset et méthodologie</u>", unsafe_allow_html=True)           
+        (st.write(""))
+        
+        st.markdown("##### <u> Aperçu du Dataset complet utilisé pour la détection de fraude :</u>", unsafe_allow_html=True)
+        (st.write(""))
+        col1_dataset, col2_dataset, col3_dataset= st.columns(3)
+        with col1_dataset:
+            metric_card("Dataframe de base", "6 353 307 lignes", color="#d1ecf1")           
+        with col2_dataset:
+            metric_card("Fraudes identifiées", "8 213", color="#d4edda")
+        with col3_dataset:
+            metric_card("Taux de fraude", "0.13 %", color="#e0c5d6")
+        
+        (st.write(""))
+        st.markdown("##### <u>Séparation des données historiques pour l'entraînement et le flux temps réel (production)</u> :", unsafe_allow_html=True)
+        (st.write(""))
+        with st.expander("**Détails de la séparation des datasets**"):
+            st.markdown("""
+Pour simuler un environnement de production réel, nous avons créé un script pour segmenter les données :
+
+* **90% (Historique)** : Utilisés pour l'entraînement initial et stockés comme base de référence.
+
+* **10% (Flux Stream)** : Isolés pour simuler l'envoi de transactions ligne par ligne.
+
+Cette méthode garantit que le modèle est testé sur des données qu'il n'a jamais rencontrées lors de sa phase d'apprentissage initiale.""")
+        (st.write(""))
+                                
+        col1, col2, col3 = st.columns(3)
+        with col1: 
+            metric_card("Dataframe d'entraînement", "5 726 358 lignes", color="#d1ecf1")   
+            metric_card("Dataframe de production", "636 262 lignes", color="#d1ecf1")         
+        with col2:
+            metric_card("Fraudes identifiées", "4 449", color="#d4edda")
+            metric_card("Fraudes identifiées", "3 764", color="#d4edda")
+        with col3:
+            metric_card("Taux de fraude", "0.07 %", color="#e0c5d6")
+            metric_card("Taux de fraude", "0.59 %", color="#e0c5d6")
+            
+        st.write("---")    
+#-------------------ONGLET STACK TECHNIQUE-------------------------
+    
+    with onglet_stack:
+        
+        (st.write(""))   
+        col1title, col2title, col3title = st.columns([5,6,1])
+        with col2title:
+            st.markdown("### <u>Stack Technique</u>", unsafe_allow_html=True)
+        (st.write("")) 
+        (st.write("")) 
+    
+        row1_col1, row1_col2, row1_col3 = st.columns(3)
+
+        with row1_col1:
+            with st.container(border=True):
+                _, centre, _ = st.columns([1.5, 2, 1])
+                with centre: st.image("images/fastapi.png", width=180)
+                st.markdown("**Communication** : Reçoit les flux et interroge le modèle. Il renvoie le verdict instantanément avant d'envoyer les données vers Redis.")
+
+        with row1_col2:
+            with st.container(border=True):
+                st.write(" ")
+                st.write(" ")
+                _, centre, _ = st.columns([1.5, 2, 1])
+
+                with centre: st.image("images/redis.png", width=115)
+                st.write(" ")
+                st.write(" ")
+                st.markdown("**Mémoire Vive** : Stocke temporairement les données pour absorber les pics de charge et garantir qu'aucune transaction n'est perdue.")
+
+
+        with row1_col3:
+            with st.container(border=True):
+                _, centre, _ = st.columns([1, 2, 1])
+                with centre: st.image("images/bigquery.png", width=180)
+                st.markdown("**Cloud** : Archive l'historique complet des transactions pour permettre le réentraînement régulier du modèle XGBoost.")
+
+
+        row2_col1, row2_col2, row2_col3 = st.columns(3)
+
+        with row2_col1:
+            with st.container(border=True):
+                _, centre, _ = st.columns([1.5, 2, 1])
+                with centre: st.image("images/grafana.png", width=175)
+                st.markdown("**Monitoring** : Visualise en temps réel la santé de l'infrastructure et l'état des flux de données via des dashboards interactifs.")
+
+        with row2_col2:
+            with st.container(border=True):
+                st.write(" ")
+                _, centre, _ = st.columns([1.5, 2, 1])
+                with centre: st.image("images/prometheus.png", width=160)
+                st.markdown("**Collecteur** : Interroge chaque service pour récupérer les métriques (CPU, RAM, latence) et les fournir à Grafana.")
+
+        with row2_col3:
+            with st.container(border=True):
+                st.write(" ")
+                st.write(" ")
+                st.write(" ")
+                _, centre, _ = st.columns([1.2, 2, 1])
+                with centre: 
+                    st.image("images/xgboost.png", width=180)
+                    st.write(" ")
+                    st.write(" ")
+                    st.write(" ")
+                    st.write(" ")
+                st.markdown("**Intelligence** : Modèle de ML (Gradient Boosting) qui analyse les patterns complexes pour calculer la probabilité de fraude.")
+
+        # --- LIGNE 3 : OPS & VITRINE ---
+        row3_col1, row3_col2, row3_col3 = st.columns(3)
+
+        with row3_col1:
+            with st.container(border=True):
+                st.write(" ")
+                st.write(" ")
+                st.write(" ")
+                _, centre, _ = st.columns([1.5, 2, 1])
+                with centre: 
+                    st.write(" ")
+                    st.image("images/docker.png", width=160)
+                    st.write(" ")
+                    st.write(" ")
+                    st.write(" ")
+                    st.write(" ")
+                st.markdown("**Docker** : Garantit une exécution homogène et isolée de chaque service dans n'importe quel environnement.")
+                st.write(" ")
+
+        with row3_col2:
+            with st.container(border=True):
+                _, centre, _ = st.columns([1, 2, 1])
+                with centre: st.image("images/streamlit.png", width=180)
+                st.markdown("**Vitrine** : Interface interactive permettant de présenter les résultats, les fraudes et les mètriques clés du modèle.")
+
+        with row3_col3:
+            with st.container(border=True):
+                st.write(" ")
+                _, centre, _ = st.columns([1.5, 2, 1])
+                with centre: 
+                    st.image("images/prefect.png", width=140)
+                    st.write(" ")
+                    st.write(" ")
+                st.markdown("**Prefect** : Orchestre et automatise le pipeline de données et le cycle de réentraînement du modèle.")
+            
+    with onglet_eda:
+        (st.write(""))   
+        col1title, col2title, col3title = st.columns([5,6,3])
+        with col2title:
+            st.markdown("### <u>Analyse exploratoire des données</u>", unsafe_allow_html=True)
+        (st.write(""))
+        st.markdown("Voici un résumé des principales découvertes issues de notre analyse exploratoire des données (EDA) sur le dataframe d'entrainement du modèle.")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            with st.container(border=True):
+                st.write("")
+                st.write("")
+                st.write("")
+                st.write(" ")
+                st.write("")
+                st.image("images/bar_chart_types.png")
+                st.write("")
+                st.write("")
+                st.write("")
+                st.write(" ")
+                st.write("")
+                st.markdown("##### 1. Répartition des fraudes par type de transaction")
+                st.markdown("Les fraudes sont inégalement réparties selon le type de transaction. Les types 'TRANSFER' et 'CASH_OUT' représentent la majorité des fraudes détectées, suggérant que les fraudeurs privilégient ces méthodes pour leurs activités illicites.")
+
+        with col2:      
+            with st.container(border=True):
+                st.image("images/pie_chart_fraude.png", width=700)
+                st.markdown("##### 2. Proportion de transactions frauduleuses")
+                st.markdown("Le graphique circulaire montre que les transactions frauduleuses sur les données de productions constituent une très faible proportion du total des transactions (0.1%).")
+                st.write("")
+            
+
+        col1a, col2a = st.columns(2)
+        with col1a:
+            with st.container(border=True):
+                st.write(" ")
+                st.write(" ")
+                st.image("images/histplot_heures.png", width=1200)
+                st.write(" ")
+                st.write(" ")
+                st.write(" ")
+                st.write(" ")
+                st.markdown("##### 3. Distribution des fraudes par heure de la journée")
+                st.markdown("L'analyse horaire révèle que les fraudes n'ont pas de période spécifique dans la journée. Peut-être en raison de la nature automatisée des attaques, les fraudeurs opèrent à toute heure, rendant la détection basée sur le temps plus complexe.")
+
+        with col2a:
+            with st.container(border=True):
+                st.write(" ")
+                st.write(" ")
+                st.image("images/histogramme_final.png", width=705)
+                st.markdown("##### 4. Montants des fraudes par type de transaction")
+                st.markdown("""
+L'analyse de la distribution montre que la majorité des fraudes porte sur des montants significatifs, 
+avec un pic marqué entre **100 000 € et 1 000 000 €**. La présence d'une barre isolée à l'extrémité droite 
+suggère l'existence d'un **plafond transactionnel** fréquemment atteint par les fraudeurs.
+""")   
+    
+#------------Navigation des pages
 
 
 if page_selection == "Tableau de bord":
     page_stats()
 elif page_selection == "Performance du modèle":
     page_performance_modele()
+elif page_selection == "Le projet":
+    page_eda()

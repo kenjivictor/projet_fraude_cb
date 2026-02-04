@@ -62,6 +62,8 @@ services:
     command: ["uv", "run", "streamlit", "run", "src/dashboard/dashboard.py", "--server.address", "0.0.0.0", "--server.runOnSave", "true"]
     volumes:
       - ./src:/app/src
+      - ./images:/app/images
+      - ./.streamlit:/app/.streamlit
     ports:
       - "${DASHBOARD_PORT}:${DASHBOARD_PORT}"
 
