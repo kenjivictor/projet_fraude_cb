@@ -50,7 +50,7 @@ Pour garder un contrôle total sur la solution, nous avons déployé deux centre
 
 3. **L'efficacité des alertes (Précision de 63 %)** : Sur l'ensemble des transactions bloquées pour suspicion, près de 2 sur 3 sont réellement des fraudes. Ce score élevé permet aux équipes de sécurité de se concentrer sur des menaces hautement probables plutôt que de traiter un volume ingérable de fausses alertes.
 
-![Métriques du modèle](images/performance_modele.gif)
+![Métriques du modèle](images/performances_modele.gif)
 
 
 ### Note sur la simulation de la "Vérité Terrain"
