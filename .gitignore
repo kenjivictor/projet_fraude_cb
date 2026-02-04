@@ -17,3 +17,7 @@ gcp-key.json
 
 # Dossier
 data/
+src/models/archives/*
+
+# modeles
+src/models/pipeline_latest.joblib

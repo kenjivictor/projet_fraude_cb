@@ -26,6 +26,14 @@ except Exception:
     # Si le fichier n'existe pas encore on prend v1
     pipeline = joblib.load('src/models/pipeline_v1.joblib')
     print("API : Chargement de la V1 (modèle de secours).")
+    
+# Historique metrique modele v1
+historique_versions = [{"version_id": "V1 (Initiale)",
+        "metrics": {
+            "recall": 87.00,
+            "precision": 63.00,
+            "f1": 73.00,
+            "accuracy": 100.00}}]  
 
 # défini le Json attendu en entree
 class TransmissionRequest(BaseModel):
@@ -108,6 +116,17 @@ async def recevoir_transaction(transaction: TransmissionRequest):
         print(f"Transaction saine : {transaction.amount}€")
     return {"prediction": verdict, "status": "success"}
 
+# Metriques modele
+@app.post("/update_metrics")
+async def update_metrics(data: dict):
+    global historique_versions
+    
+    historique_versions.insert(0, data)
+    #Uniquement 5 dernieres versions
+    historique_versions = historique_versions[:5]
+    
+    return {"status": "success"}
+
 
 @app.get("/report")
 async def report():
@@ -122,7 +141,8 @@ async def report():
         "infos":  {"nb_transactions" : total_traitees},
         "details": fraudes_decodees,
         "nb_fraudes_detectees": len(fraudes_decodees),
-        "matrix": matrix_stats
+        "matrix": matrix_stats,
+        "history": historique_versions
     }
 
 

@@ -9,6 +9,8 @@ from prefect import task, flow
 import time
 import json
 from dotenv import load_dotenv
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import recall_score, precision_score, f1_score, accuracy_score
 
 load_dotenv()
 
@@ -77,6 +79,10 @@ def retrain_model(nouveau_nombre_lignes):
     X_new = new_data.drop('isFraud', axis=1)
     y_new = new_data['isFraud']
     
+    # X train
+    
+    X_train, X_val, y_train, y_val = train_test_split(X_new, y_new, test_size=0.2, stratify=y_new)
+    
     # Calcul ratio dynamique
     count_norm = (y_new == 0).sum()
     count_fraud = (y_new == 1).sum()
@@ -91,6 +97,19 @@ def retrain_model(nouveau_nombre_lignes):
 
     # Entranement (Fit)
     print("Entraînement du modèle en cours...")
+    pipeline.fit(X_train, y_train)
+    
+    # On prédit sur les 20% restants
+    y_pred = pipeline.predict(X_val)
+    
+    metrics_simple = {
+        "recall": round(recall_score(y_val, y_pred, pos_label=1) * 100, 2),
+        "precision": round(precision_score(y_val, y_pred, pos_label=1) * 100, 2),
+        "f1": round(f1_score(y_val, y_pred, pos_label=1) * 100, 2),
+        "accuracy": round(accuracy_score(y_val, y_pred) * 100, 2)
+    }
+    
+    # Réentrainement sur l'ensemble des données
     pipeline.fit(X_new, y_new)
 
     # Sauvegarde et versionning
@@ -104,6 +123,17 @@ def retrain_model(nouveau_nombre_lignes):
 
     print(f"Archive créée : {archive_name}")
     print(f"Fichier 'latest' mis à jour.")
+    
+    # Envoi des scores a l'API
+    try:
+        payload = {
+            "version_id": datetime.now().strftime("%d/%m/%Y %H:%M"),
+            "metrics": metrics_simple
+        }
+        requests.post("http://api-recepteur:8000/update_metrics", json=payload, timeout=5)
+        print("Métriques envoyées à l'API.")
+    except Exception as e:
+        print(f"Erreur envoi API : {e}")
     
     state["last_count"] = int(nouveau_nombre_lignes)
     with open('state.json', 'w') as f:
@@ -141,7 +171,7 @@ def start_pipeline() :
     else :
         print("Pas assez de nouvelles données pour réentraîner le modèle.")
 
-#delai poru réentrainement toutes les 5 minutes (intervalle=120 sec)
+#delai poru réentrainement toutes les 2 minutes (intervalle=120 sec)
 if __name__ == "__main__":
 
     print("Démarrage de l'automatisation de réentraînement...")  
@@ -151,7 +181,7 @@ if __name__ == "__main__":
             with open('state.json', 'r') as f:
                 config = json.load(f)
             
-            attente = config.get("check_interval_secondes", 120)
+            attente = config.get("check_interval_secondes")
         except Exception as e:
             print(f"Erreur : {e}")
             

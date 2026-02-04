@@ -33,9 +33,13 @@ Plutôt qu'un modèle statique, nous avons conçu une infrastructure évolutive.
 
 Pour garder un contrôle total sur la solution, nous avons déployé deux centres de commandement :
 
- - Pour garder le contrôle, nous avons développé un **panneau de suivi Streamlit**. Il permet de visualiser les flux en temps réel, d'analyser les comportements suspects et de piloter la stratégie de sécurité de la banque. C'est ici que l'intelligence artificielle rencontre l'humaine.
+ - Pour garder le contrôle, nous avons développé un **panneau de suivi Streamlit**. Il permet de visualiser les flux en temps réel, d'analyser les comportements suspects et de piloter la stratégie de sécurité de la banque. C'est ici que l'intelligence artificielle rencontre l'humain.
+
+![Détection de fraudes](images/streamlit_fraudes.gif)
 
  - **La supervision infrastructure (Grafana & Prometheus)** : Cette interface surveille la santé technique du système. Nous suivons en temps réel la consommation CPU/RAM de chaque conteneur et la latence de l'API pour garantir une haute disponibilité et des performances constantes sous la charge.
+
+ ![Monitoring Grafana](images/grafanaa.gif)
 
 
 ### Nos résultats sur la fraude
@@ -45,6 +49,8 @@ Pour garder un contrôle total sur la solution, nous avons déployé deux centre
 2. **La fluidité client (Spécificité de 99,4 %)** : Nous garantissons une expérience sans problème. 99,4 % des transactions légitimes sont validées instantanément, minimisant ainsi le mécontentement client.
 
 3. **L'efficacité des alertes (Précision de 63 %)** : Sur l'ensemble des transactions bloquées pour suspicion, près de 2 sur 3 sont réellement des fraudes. Ce score élevé permet aux équipes de sécurité de se concentrer sur des menaces hautement probables plutôt que de traiter un volume ingérable de fausses alertes.
+
+![Métriques du modèle](images/performances_modele.gif)
 
 
 ### Note sur la simulation de la "Vérité Terrain"
@@ -69,33 +75,46 @@ Pour les besoins de la démonstration en temps réel et pour permettre au cycle 
 
 L'application repose sur une architecture micro-services conteneurisée avec Docker.
 
+**La Stack technique**
+
+![Stack Technique](images/resume_stack.png)
+
+---
+
+**Le pipeline**
+
+
 ```text
 [ SOURCE : PaySim_stream.csv ]
++-------------------------------+
+| Transactions (streamenvoi.py) |
++-------------------------------+
       |
-      | Lecture (streamenvoi.py)
+ FAST |
+ API  | 
       v
-[ CERVEAU : API + Modèle ] <---------------------------+
-+-----------------------+       +-------------------+  |
-|  streamrecepteur.py   | ----> |  ML_XGBoost.ipynb |  | 
-|  (FastAPI + modèle)   | <---- |  Modèle XGBoost   |  |    
-+-----------------------+       +-------------------+  |
-      |                                                |
-      | Résultats (LPUSH)                              |
-      v                                                |
-[ STOCKAGE : Redis ]                                   |
-+------------------------------------------+           |
-|              REDIS (Cache)               |           |
-|  - flux_global (Archive BigQuery)        |           |
-|  - flux_streamlit (Affichage direct)     |           |
-+------------------------------------------+           |
-      |                     |                          |
-      |                     | Archivage                |
-      |                     v                          |
-      |                +-------------------+    [ MLOPS : Prefect ]
-      |                |   worker_bq.py    |    +-----------------+
-      |                | (Envoi BigQuery)  |--->|  retrain.py     |
-      |  Monitoring    +-------------------+    |  (Auto-Train)   |
-      v                                         +-----------------+
+[ CERVEAU : API + Modèle ] 
++-----------------------+       +-------------------+            
+|  streamrecepteur.py   | ----> |  ML_XGBoost.ipynb |             
+|  (FastAPI + modèle)   | <---- |  Modèle XGBoost   |<------------+   
++-----------------------+       +-------------------+             |
+      ∧               ∧                                           |
+      |               | Résultats (RESP)                          |
+      |               v                                           |
+      |           [ STOCKAGE : Redis ]                            |
+      |     +------------------------------------------+    [ MLOPS : Prefect ]
+      |     |              REDIS (Cache)               |    +-----------------+
+      |     |  - flux_global (Archive BigQuery)        |    |  retrain.py     |
+ FAST |     |  - flux_streamlit (Affichage direct)     |    |  (Auto-Train)   |
+ API  |     +------------------------------------------+    +-----------------+
+      |                     |                                     ∧ 
+      |                     | Archivage (RESP)                    | API BigQuery et SQL
+      |                     v                                     v 
+      |                +-------------------+                [ Data Warehouse ]
+      |                |   worker_bq.py    |  API BigQuery  +-----------------+
+      |                | (Envoi BigQuery)  |--------------->|      BigQuery   |
+      |  Monitoring    +-------------------+                +-----------------+
+      v                                                     
       +----------------------------------------------------------+
       |                                                          |     
       v                                                          v
@@ -111,13 +130,13 @@ L'application repose sur une architecture micro-services conteneurisée avec Doc
 
 ## Gestion des données
 
-Le projet utilise le dataset PaySim [(disponible ici sur Kaggle)](https://www.kaggle.com/datasets/mtalaltariq/paysim-data).
+Le projet utilise le dataset PaySim [(disponible ici sur Kaggle)](https://www.kaggle.com/datasets/ealaxi/paysim1/data).
 
 Pour simuler un environnement de production réel, nous avons créé un script ```decoupe.py``` pour segmenter les données :
 
- - **90% (Historique)** : Utilisés pour l'entraînement initial et stockés comme base de référence.
+ - **90% (Historique)** : Utilisées pour l'entraînement initial et stockées comme base de référence.
 
- - **10% (Flux Stream)** : Isolés pour simuler l'envoi de transactions ligne par ligne par streamenvoi.py.
+ - **10% (Flux Stream)** : Isolées pour simuler l'envoi de transactions ligne par ligne par ```streamenvoi.py```.
 
 Cette méthode garantit que le modèle est testé sur des données qu'il n'a jamais rencontrées lors de sa phase d'apprentissage initiale.
 
@@ -127,7 +146,7 @@ Cette méthode garantit que le modèle est testé sur des données qu'il n'a jam
 
 ### Prérequis
 
-   - **Docker** & Docker Compose installés.
+   - **Docker** & **Docker Compose** installés.
 
    - **BigQuery** : Créer un projet sur la Console Google Cloud.
 
@@ -138,7 +157,7 @@ Cette méthode garantit que le modèle est testé sur des données qu'il n'a jam
 
 1. **Cloner le projet.**
 
-2. **Télécharger le dataset PaySim [(disponible ici sur Kaggle)](https://www.kaggle.com/datasets/mtalaltariq/paysim-data).** et le placer dans ```./data/```
+2. **Télécharger le dataset PaySim.csv [(disponible ici sur Kaggle)](https://www.kaggle.com/datasets/ealaxi/paysim1/data).** et le placer dans ```./data/```
 
 
 3. **Copier le template des variables d'environnement**
@@ -153,9 +172,9 @@ Cette méthode garantit que le modèle est testé sur des données qu'il n'a jam
 
 5. **Découpe du dataset**
 
-      ```uv run src/notebooks/decoupe.py```
+      ```uv run notebooks/decoupe.py```
    
-      -> Dataset ```PaySim_stream.csv``` et ```PaySim_historical.csv``` créés dans le dossier ./data/
+      -> Dataset ```PaySim_stream.csv``` et ```PaySim_historical.csv``` créés dans le dossier `./data/`
 
 6. **Générer la clé Json Bigquery**
 
@@ -165,7 +184,7 @@ Cette méthode garantit que le modèle est testé sur des données qu'il n'a jam
 
 7. **Ingestion des données historiques dans BigQuery**
 
-      ```uv run ingestion/ingestion.py```
+      ```uv run src/ingestion/ingestion.py```
 
 8. **Lancer l'infrastructure :**
 
@@ -207,7 +226,7 @@ Métrique|Valeur|Interprétation
 
 ## Automatisation MLOps
 
-Le conteneur retrain-automation surveille la table BigQuery via Prefect.
+Le conteneur `retrain-automation` surveille la table BigQuery via Prefect.
 
  - Modularité : Le seuil de déclenchement (```min_rows_to_retrain```), le nombre de transactions récupérées sur BigQuery  (```limit_sql```) et l'intervalle de vérification (```check_interval_secondes```) sont modifiables sans redémarrage dans ```state.json```.
 
@@ -245,9 +264,9 @@ Le conteneur retrain-automation surveille la table BigQuery via Prefect.
 
 Pour remettre le projet à zéro, tapez uniquement cette CLI  : ```python reset_projet.py```
 
- - **Modèles** : Suppression de pipeline_latest.joblib et vidage des archives.
+ - **Modèles** : Suppression de `pipeline_latest.joblib` et vidage des archives.
 
- - **État** : Réinitialisation du compteur last_count dans state.json.
+ - **État** : Réinitialisation du compteur `last_count` dans `state.json`.
 
  - **Infrastructure** : Purge totale de Redis (via Docker) et des tables BigQuery.
 
@@ -261,12 +280,15 @@ Pour remettre le projet à zéro, tapez uniquement cette CLI  : ```python reset_
 | **Déséquilibre des classes** | Dataset à 0.13% de fraudes, biaisant fortement les prédictions initiales. | Utilisation de `scale_pos_weight` calculé dynamiquement sur le ratio réel Fraude/Normal lors du réentraînement. |
 | **Performance de l'entraînement** | RandomForest trop lent pour l'optimisation par GridSearch (estimé à plusieurs mois). | Passage à **XGBoost (CUDA/GPU)** et utilisation de **RandomizedSearch** pour une optimisation rapide. |
 | **Optimisation du réentraînement** | Temps de calcul excessif et risques d'incompatibilité matérielle **(CUDA/GPU)** selon l'hôte.| Mise en place d'un **échantillonnage intelligent** : filtrage des données BigQuery pour entraîner sur un volume optimal, garantissant un cycle MLOps rapide et compatible CPU|
+| **Arbitrage technologique du Front-end** | Risque de dépassement des délais dû à la courbe d'apprentissage élevée de Django pour l'interface de monitoring. | Pivot vers **Streamlit** : développement rapide d'un dashboard interactif "Python-native" parfaitement adapté aux besoins data. |
 | **Affichage Temps Réel** | Interface Streamlit statique par défaut, ne reflétant pas le flux entrant. | Boucle `while True` avec placeholders `st.empty()` pour rafraîchir les KPIs sans rechargement de page. |
 | **Reset de Redis** | La consommation des données par le worker BigQuery vidait le cache Redis, rendant les données indisponibles pour le dashboard. | Mise en place d'un **double flux** : un flux persistant pour l'UI Streamlit et un autre pour l'archivage BigQuery. |
 | **Choix de l'Orchestrateur** | Airflow s'est révélé trop complexe et gourmand en ressources pour ce projet. | Pivot vers **Prefect**, plus léger, moderne et parfaitement adapté à notre architecture événementielle. |
 | **Apprentissage Docker** | Complexité des réseaux inter-conteneurs et des dépendances pour des novices. | Gestion des ordres de démarrage (`depends_on`) et isolation des réseaux internes (`networks`). |
 | **Synchronisation du Pipeline** | Risque de charger un modèle incomplet pendant l'écriture disque. | Système de **notification Push** : l'API recharge le modèle via `/reload` uniquement après confirmation de sauvegarde complète. |
 | **Data Leakage** | Score de performance artificiellement élevé (99.9%) via les variables `newbalance`. | **Suppression préventive** des variables "du futur" (`newbalanceOrig/Dest`). |
-
+| **Persistance et portabilité du monitoring** | Perte systématique des visualisations Grafana lors du redémarrage des conteneurs (non-persistance). | Automatisation via **Dashboard-as-Code** (Provisioning) : injection de fichiers JSON et YAML pour un déploiement reproductible. |
+| **Monitoring : rupture des liens Data Source** | Tableaux de bord vides après import automatique car l'ID et l'adresse IP de la source de données changeaient. | Fixation des adresses IP et UID des containers via YAML et mise à jour du schéma JSON pour garantir la connexion immédiate au déploiement. |
+| **Exposition des métriques de fraude** | Conflit d'exécution entre le serveur de métriques Prometheus et la boucle d'événement asynchrone de FastAPI. | Intégration de `prometheus-fastapi-instrumentator` pour exposer les métriques sur un endpoint `/metrics` unifié. |
 
 

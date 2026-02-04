@@ -8,6 +8,7 @@ import time
 import redis
 import plotly.express as px
 from pathlib import Path
+import matplotlib.colors as mcolors
 
 # Page conffig
 st.set_page_config(
@@ -225,52 +226,45 @@ def page_stats():
 
 @st.fragment(run_every=1)
 def page_performance_modele():
-    #placeholder2 = st.empty()
-    
-    if "current_version_id" not in st.session_state:
-        st.session_state.current_version_id = None
-    
-    #while True:
     reload_data = get_reload()
+    
+    # Notif
+    
     if reload_data and reload_data.get("status") == "success":
         new_id = reload_data.get("version_id")
-        
-        if st.session_state.current_version_id is not None and new_id != st.session_state.current_version_id:
+        if "current_version_id" not in st.session_state:
+            st.session_state.current_version_id = new_id
+        elif new_id != st.session_state.current_version_id:
             st.toast(f"Modèle XGBoost réentraîné ! ({reload_data['modele_du']})", icon="✅")
-        st.session_state.current_version_id = new_id
+            st.session_state.current_version_id = new_id 
     
-    
-    #with placeholder2.container():
     coltitle1, coltitle2, coltitle3 = st.columns([4,6,2])
     with coltitle2:
         st.title("Performance du modèle")
-    coltitlee1, coltitlee2, coltitlee3 = st.columns([6,6,6])
+    coltitlee1, coltitlee2, coltitlee3 = st.columns([6.2,5.5,7])
     with coltitlee2:
         if reload_data and reload_data.get("status") == "success":
             st.info(f"🛡️ **Modèle en production** | Version du : {reload_data['modele_du']}")
         
     st.divider()
     
+    # Récupération des données
     report = get_report()
+    
     if report:
         m = report["matrix"]
         
-        #Calcul metriques
+        # Calcul des métriques globales 
         total_f = m["vrais_positifs"] + m["faux_negatifs"]
         recall = (m["vrais_positifs"] / total_f * 100) if total_f > 0 else 0
         precision = (m["vrais_positifs"] / (m["vrais_positifs"] + m["faux_positifs"]) * 100) if (m["vrais_positifs"] + m["faux_positifs"]) > 0 else 0
         f1_score = (2 * (precision * recall) / (precision + recall)) if (precision + recall) > 0 else 0
         taux_fp = (m["faux_positifs"] / (m["faux_positifs"] + m["vrais_negatifs"]) * 100) if (m["faux_positifs"] + m["vrais_negatifs"]) > 0 else 0
         
-        # affichage matrice de confusion
-        
+        # Matrice confusion ---
         col1nn,col2nn, col3nn = st.columns([4,6,1])
-        with col1nn:
-            st.write("")
         with col2nn:
             st.subheader("Matrice de confusion du modèle")
-        with col3nn:
-            st.write("")             
         st.write(" ")   
             
         col1, col2 = st.columns(2)            
@@ -281,42 +275,87 @@ def page_performance_modele():
         with col2:
             metric_card("FAUX POSITIFS (ALERTES)", format_metriques(m["faux_positifs"]), color="#fff3cd") 
             metric_card("VRAIS POSITIFS (FRAUDES)", format_metriques(m["vrais_positifs"]), color="#d1ecf1") 
-
-        # affichage metriques
+            
+        # Affichage Métriques Globales ---
         st.divider()
         col1nnn,col2nnn, col3nnn = st.columns([4,6,1])
         with col2nnn:
             st.subheader("Différentes métriques du modèle")
         st.write(" ")
+        
         col1, col2, col3, col4 = st.columns(4)
-
         with col1:
             metric_card(label="🎯 Recall (Sécurité)", value=f"{recall:.2f}%", color="#d4edda")
-
         with col2:
             metric_card(label="⚖️ Précision", value=f"{precision:.2f}%",color="#f8d7da")
-
         with col3:
             metric_card(label="📈 F1-Score", value=f"{f1_score:.2f}%", color="#fff3cd")
-
         with col4:
-            metric_card(label="🛡️ Taux FP", value=f"{taux_fp:.2f}%", color="#d1ecf1")
-
-        # --- Section Explications ---
+            metric_card(label="🛡️ Taux FP", value=f"{taux_fp:.2f}%", color="#d1ecf1")        # Affichage Métriques Globales ---
+        
+        # explications 
+        st.write("")
         st.write(" ")
         with st.expander("ℹ️ Comprendre ces indicateurs", expanded = True):
             st.markdown(f"""
             * **Recall ({recall:.2f}%)** : Sur 100 tentatives de fraude, le système en stoppe **{int(recall)}**. C'est l'indicateur de protection contre la fraude.
             * **Précision ({precision:.2f}%)** : Une alerte sur **{int(100/precision) if precision > 0 else 0}** est une vraie fraude. Cela représente l'efficacité du modèle.
-            * **F1-Score ({f1_score:.2f}%)** : C'est la **moyenne équilibrée** entre la détection (Recall) et la fiabilité (Précision). Plus il est haut, plus le modèle est stable.
-            * **Taux de Faux Positifs ({taux_fp:.2f}%)** : Seuls **{taux_fp:.2f}%** des clients honnêtes sont impactés. C'est l'indicateur de satisfaction client.
+            * **F1-Score ({f1_score:.2f}%)** : C'est la moyenne équilibrée entre la détection (Recall) et la fiabilité (Précision).
+            * **Taux de Faux Positifs ({taux_fp:.2f}%)** : Seuls **{taux_fp:.2f}%** des clients honnêtes sont impactés.
             """)
-    else:
-        # Message d'attente discret si l'API ne répond pas encore
-        st.write("")
-        #time.sleep(1)
+            
+        st.divider()
+        
+        # --- Historique des version ---
+        col_h1, col_h2, col_h3 = st.columns([4.3,6,1])
+        with col_h2:
+            st.subheader("Comparatif des versions")
+        st.write(" ")
 
-    
+        if "history" in report and report["history"]:
+            data_clean = []
+            for version in report["history"]:
+                row = {
+                    "Version": version["version_id"],
+                    "Recall (%)": version["metrics"]["recall"],
+                    "Précision (%)": version["metrics"]["precision"],
+                    "F1-Score (%)": version["metrics"]["f1"],
+                    "Accuracy (%)": version["metrics"]["accuracy"]
+                }
+                data_clean.append(row)
+            
+            # Affichage du DataFrame
+            # Création de la palette Pastel (Rouge -> Jaune -> Vert)
+            # Hex codes: Rouge pastel (#ffb3ba), Jaune pastel (#ffffba), Vert pastel (#baffc9)
+            colors = ["#ffb3ba", "#ffffba", "#baffc9"]
+            cmap_pastel = mcolors.LinearSegmentedColormap.from_list("pastel_rdylgn", colors)
+            df_history = pd.DataFrame(data_clean)
+            st.dataframe(
+                df_history.style
+                .format("{:.2f}", subset=["Recall (%)", "Précision (%)", "F1-Score (%)", "Accuracy (%)"]) # Force 2 décimales
+                .background_gradient(cmap=cmap_pastel, subset=["Recall (%)", "F1-Score (%)"]),
+                use_container_width=True,
+                hide_index=True
+            )
+            st.write("")
+            
+            with st.expander("ℹ️ Pourquoi ces écarts ? Comprendre les métriques et l'échantillon"):
+                st.markdown("""
+                ##### 1. Périmètre de l'évaluation
+                Les résultats ci-dessus sont calculés sur **le jeu de test** (données que le modèle n'a jamais vues), et non sur l'entraînement. C'est le reflet de la performance réelle en production.
+
+                ##### 2. L'échantillonnage
+                Le nombre de fraudes réelles sur notre simulation est très faible au départ :
+                
+                * **Entraînement massif :** Le modèle a appris la fraude sur un historique de **centaines de milliers de transactions**.
+                * **Simulation en cours :** La simulation actuelle ne contient pour l'instant que **quelques milliers de lignes**.
+
+                ---
+                *Avec ce volume réduit au démarrage, les indicateurs statistiques ne sont pas encore totalement stabilisés. Ils s'affineront à mesure que le volume de données augmentera.*
+                """)
+            
+        st.divider()    
+
 ##-------------------------------- EDA ----------------------------
 def page_eda():
     title = "Présentation du projet"
@@ -549,7 +588,7 @@ Cette méthode garantit que le modèle est testé sur des données qu'il n'a jam
 
         with col2:      
             with st.container(border=True):
-                st.image("images/pie_chart_fraude.png", width=700)
+                st.image("images/pie_chart_fraude.png", width=715)
                 st.markdown("##### 2. Proportion de transactions frauduleuses")
                 st.markdown("Le graphique circulaire montre que les transactions frauduleuses sur les données de productions constituent une très faible proportion du total des transactions (0.1%).")
                 st.write("")
@@ -570,6 +609,7 @@ Cette méthode garantit que le modèle est testé sur des données qu'il n'a jam
 
         with col2a:
             with st.container(border=True):
+                st.write(" ")
                 st.write(" ")
                 st.write(" ")
                 st.image("images/histogramme_final.png", width=705)
