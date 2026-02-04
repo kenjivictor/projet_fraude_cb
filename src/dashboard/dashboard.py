@@ -89,7 +89,7 @@ with st.sidebar:
         options=["Tableau de bord", "Performance du modèle", "Le projet"],
         icons=["speedometer2", "graph-up-arrow", "book"], 
         menu_icon="cast")
-    st.page_link("http://localhost:3000/", label = "Grafana métrics 🏃‍➡️")
+    st.link_button("⚡ Accéder au Monitoring", "http://localhost:3000/", use_container_width=True)
     
 #---------- PAge stats    
 #actualisation de la vue en temps réel
