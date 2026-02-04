@@ -184,6 +184,7 @@ if __name__ == "__main__":
             attente = config.get("check_interval_secondes")
         except Exception as e:
             print(f"Erreur : {e}")
+            attente = 120
             
         print(f"Attente de {attente} secondes avant la prochaine vérification...")
         time.sleep(attente) 
