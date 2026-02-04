@@ -618,8 +618,50 @@ Cette méthode garantit que le modèle est testé sur des données qu'il n'a jam
 L'analyse de la distribution montre que la majorité des fraudes porte sur des montants significatifs, 
 avec un pic marqué entre **100 000 € et 1 000 000 €**. La présence d'une barre isolée à l'extrémité droite 
 suggère l'existence d'un **plafond transactionnel** fréquemment atteint par les fraudeurs.
-""")   
-    
+""")  
+
+# --------------------------- ONGLET FLUX DE DONNEES ----------------------------- 
+
+    with onglet_flux_de_donnees:
+        (st.write(""))
+        with st.container(border=True, horizontal_alignment="center"):   
+            st.markdown("### Flux de données", text_alignment="center", unsafe_allow_html=True)
+            st.write("")
+            st.markdown("#### Architecture du pipeline de détection de fraude en temps réel", text_alignment="center", unsafe_allow_html=True)
+            st.image("images/pipeline.png", width=1000)
+
+# --------------------------- ONGLET L'EQUIPE -----------------------------
+
+    with onglet_equipe:
+        (st.write(""))   
+        col1title, col2title, col3title = st.columns([5,6,1])
+        with col2title:
+            st.markdown("### L'équipe", unsafe_allow_html=True)
+        (st.write("")) 
+        (st.write("")) 
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            with st.container(border=True):
+                _, centre, _ = st.columns([1.5, 2, 1])
+                with centre:
+                    st.image("images/kenji_victor.png", width=250)
+                    st.markdown("**Kenji VICTOR**  \n ###### Streamlit, Grafana & Prometheus, FastAPI  \n")
+                    st.markdown("###### [LinkedIn](https://www.linkedin.com/in/kenji-victor/)")
+        with col2: 
+            with st.container(border=True):     
+                _, centre, _ = st.columns([1.5, 2, 1])
+                with centre:
+                    st.image("images/frederic_bayen.png", width=250)
+                    st.markdown("**Frédéric BAYEN**  \n ###### Architecture MLOps, Bigquery, Streamlit, FastAPI & Automatisation \n")
+                    st.markdown("###### [LinkedIn](https://www.linkedin.com/in/fr%C3%A9d%C3%A9ric-bayen/)")
+        with col3: 
+            with st.container(border=True):     
+                _, centre, _ = st.columns([1.5, 2, 1])
+                with centre:
+                    st.image("images/jb_leduc.jpg", width=250)
+                    st.markdown("**Jean-Baptiste LEDUC**  \n ###### Data Visualization, Streamlit Dashboards, Buffer Redis, Modélisation XGBoost \n")
+                    st.markdown("###### [LinkedIn](https://www.linkedin.com/in/leduc-jean-baptiste/)")
+
 #------------Navigation des pages
 
 
@@ -629,3 +671,4 @@ elif page_selection == "Performance du modèle":
     page_performance_modele()
 elif page_selection == "Le projet":
     page_eda()
+
