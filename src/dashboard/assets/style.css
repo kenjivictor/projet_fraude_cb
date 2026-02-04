@@ -35,3 +35,91 @@
     font-size: 0.92rem !important;
     line-height: 1.5 !important;
 }
+
+/* --- Style des Onglets (Tabs) --- */
+
+/* Conteneur global des onglets */
+[data-testid="stTabs"] {
+    background-color: transparent !important;
+    gap: 10px !important;
+}
+
+/* Style de chaque onglet individuel */
+button[data-testid="stMarker"] {
+    display: none !important; /* On cache la petite barre rouge par défaut */
+}
+
+button[data-baseweb="tab"] {
+    height: 60px !important; /* Plus gros */
+    background-color: #ffffff !important;
+    border: 1px solid #e0e6ed !important;
+    border-radius: 15px 15px 0 0 !important; /* Arrondis sur le haut */
+    padding: 10px 30px !important;
+    font-size: 1.1rem !important;
+    font-weight: 600 !important;
+    color: #5d6d7e !important;
+    transition: all 0.3s ease !important;
+    margin-right: 5px !important;
+}
+
+/* Onglet survolé (Hover) */
+button[data-baseweb="tab"]:hover {
+    background-color: #f8faff !important;
+    color: #779ecb !important;
+    border-color: #b3c6ff !important;
+    transform: translateY(-2px);
+}
+
+/* Onglet actif (Sélectionné) */
+button[data-baseweb="tab"][aria-selected="true"] {
+    background-color: #ffffff !important;
+    color: #779ecb !important;
+    border-bottom: 3px solid #779ecb !important; /* Barre d'accentuation personnalisée */
+    box-shadow: 0 -5px 15px rgba(119, 158, 203, 0.1) !important;
+}
+
+/* Ajustement du contenu à l'intérieur de l'onglet */
+button[data-baseweb="tab"] div p {
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+}
+
+
+/* --- Style des Expanders  --- */
+
+[data-testid="stExpander"] {
+    background-color: #f9f6fb !important; /* Un fond très légèrement teinté violet */
+    border-radius: 15px !important;
+    border: 1px solid #e0e6ed !important;
+    border-left: 6px solid #633694 !important; /* Bordure latérale pour le rappel sidebar */
+    box-shadow: 0 4px 12px rgba(99, 54, 148, 0.05) !important;
+    margin-bottom: 1rem !important;
+}
+
+/* En-tête de l'expander */
+[data-testid="stExpanderSummary"] {
+    background-color: #ffffff !important;
+}
+
+/* LE TITRE : Passage au violet profond */
+[data-testid="stExpanderSummary"] p {
+    color: #633694 !important; 
+    font-weight: 800 !important; /* On force le gras */
+    font-size: 1.05rem !important;
+    letter-spacing: 0.5px !important;
+}
+
+/* L'ICÔNE (Flèche) */
+[data-testid="stExpanderSummary"] svg {
+    fill: #633694 !important;
+    transform: scale(1.2) !important; /* On la grossit un peu */
+}
+
+/* Effet au survol du titre */
+[data-testid="stExpanderSummary"]:hover {
+    background-color: #f4f0fa !important;
+}
+
+[data-testid="stExpanderSummary"]:hover p {
+    color: #4b2871 !important; /* Violet encore plus sombre au survol */
+}
