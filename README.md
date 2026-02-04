@@ -69,36 +69,46 @@ Pour les besoins de la démonstration en temps réel et pour permettre au cycle 
 
 L'application repose sur une architecture micro-services conteneurisée avec Docker.
 
+**La Stack technique**
+
 ![Stack Technique](images/resume_stack.png)
+
+---
+
+**Le pipeline**
 
 
 ```text
 [ SOURCE : PaySim_stream.csv ]
++-------------------------------+
+| Transactions (streamenvoi.py) |
++-------------------------------+
       |
-      | Lecture (streamenvoi.py)
+ FAST |
+ API  | 
       v
-[ CERVEAU : API + Modèle ] <---------------------------+
-+-----------------------+       +-------------------+  |
-|  streamrecepteur.py   | ----> |  ML_XGBoost.ipynb |  | 
-|  (FastAPI + modèle)   | <---- |  Modèle XGBoost   |  |    
-+-----------------------+       +-------------------+  |
-      |                                                |
-      | Résultats (LPUSH)                              |
-      v                                                |
-[ STOCKAGE : Redis ]                                   |
-+------------------------------------------+           |
-|              REDIS (Cache)               |           |
-|  - flux_global (Archive BigQuery)        |           |
-|  - flux_streamlit (Affichage direct)     |           |
-+------------------------------------------+           |
-      |                     |                          |
-      |                     | Archivage                |
-      |                     v                          |
-      |                +-------------------+    [ MLOPS : Prefect ]
-      |                |   worker_bq.py    |    +-----------------+
-      |                | (Envoi BigQuery)  |--->|  retrain.py     |
-      |  Monitoring    +-------------------+    |  (Auto-Train)   |
-      v                                         +-----------------+
+[ CERVEAU : API + Modèle ] 
++-----------------------+       +-------------------+            
+|  streamrecepteur.py   | ----> |  ML_XGBoost.ipynb |             
+|  (FastAPI + modèle)   | <---- |  Modèle XGBoost   |<------------+   
++-----------------------+       +-------------------+             |
+      ∧               ∧                                           |
+      |               | Résultats (RESP)                          |
+      |               v                                           |
+      |           [ STOCKAGE : Redis ]                            |
+      |     +------------------------------------------+    [ MLOPS : Prefect ]
+      |     |              REDIS (Cache)               |    +-----------------+
+      |     |  - flux_global (Archive BigQuery)        |    |  retrain.py     |
+ FAST |     |  - flux_streamlit (Affichage direct)     |    |  (Auto-Train)   |
+ API  |     +------------------------------------------+    +-----------------+
+      |                     |                                     ∧ 
+      |                     | Archivage (RESP)                    | API BigQuery et SQL
+      |                     v                                     v 
+      |                +-------------------+                [ Data Warehouse ]
+      |                |   worker_bq.py    |  API BigQuery  +-----------------+
+      |                | (Envoi BigQuery)  |--------------->|      BigQuery   |
+      |  Monitoring    +-------------------+                +-----------------+
+      v                                                     
       +----------------------------------------------------------+
       |                                                          |     
       v                                                          v
