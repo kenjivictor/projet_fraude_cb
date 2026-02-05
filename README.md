@@ -220,7 +220,7 @@ Métrique|Valeur|Interprétation
 | :--- | :--- | :--- |
 | **Recall** | 87 % | Le modèle identifie avec succès 87 % des tentatives de fraude. | 
 |**Précision** | 63 % | Lorsqu'on prédit une fraude, elle est réelle dans 63 % des cas. | 
-|**F1-Score** | 0.73 | Un excellent équilibre pour un système de détection en temps réel. | 
+|**F1-Score** | 73 % | Un excellent équilibre pour un système de détection en temps réel. | 
 
 ---
 
