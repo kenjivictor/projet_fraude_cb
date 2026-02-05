@@ -82,6 +82,7 @@ async def recevoir_transaction(transaction: TransmissionRequest):
         matrix_stats["vrais_positifs"] += 1
         
     verdict = "FRAUDE" if prediction[0] == 1 else "SAIN"
+    probabilite = pipeline.predict_proba(df)[0][1] * 100  # Probabilité de fraude
     
     # modèle de stockage dans redis au format dictionnaire
     res_to_store = {
@@ -96,7 +97,8 @@ async def recevoir_transaction(transaction: TransmissionRequest):
             "newbalanceDest": float(transaction.newbalanceDest), 
             "isFraud": int(transaction.isFraud),                
             "isFlaggedFraud": int(transaction.isFlaggedFraud),  
-            "verdict": verdict                                  
+            "verdict": verdict,
+            "probabilite": float(round(probabilite, 2))                                  
         }
     # convertir en texte pour Redis
     json_data = json.dumps(res_to_store)
@@ -114,7 +116,7 @@ async def recevoir_transaction(transaction: TransmissionRequest):
         print(f"ALERTE : Fraude détectée ! Montant: {transaction.amount}€")
     else:
         print(f"Transaction saine : {transaction.amount}€")
-    return {"prediction": verdict, "status": "success"}
+    return {"prediction": verdict,"probabilite": f"{round(probabilite, 2)}%", "status": "success"}
 
 # Metriques modele
 @app.post("/update_metrics")

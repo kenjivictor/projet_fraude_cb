@@ -40,6 +40,7 @@ while True:
         # Verifie si redis a retourné une donnée
         if donnee_brute:
             transaction = json.loads(donnee_brute)
+            transaction.pop('probabilite', None)
             paquet_a_envoyer.append(transaction)
         #Si pas de donnée, on sort
         else:

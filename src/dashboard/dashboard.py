@@ -177,11 +177,21 @@ def page_stats():
             with col2_tina :
                 st.write("### Détails des fraudes détectées")
                 st.write(" ")
-            colonnes_a_garder = ['type', 'amount', 'nameOrig', 'oldbalanceOrg', 'nameDest', 'oldbalanceDest']
+            colors = ["#ffb3ba", "#ffffba", "#baffc9"]
+            cmap_pastel = mcolors.LinearSegmentedColormap.from_list("pastel_rdylgn", colors)
+            colonnes_a_garder = ['type', 'amount','probabilite', 'nameOrig', 'oldbalanceOrg', 'nameDest', 'oldbalanceDest']
             df_display = df[colonnes_a_garder].copy()
-            df_display.columns = ['Type', 'Montant (€)', 'ID Origine', 'Solde Orig.', 'ID Destinataire', 'Solde Dest.']
-            st.dataframe(df_display, use_container_width=True)
-            
+            df_display.columns = ['Type', 'Montant (€)','Confiance (%)', 'ID Origine', 'Solde Orig.', 'ID Destinataire', 'Solde Dest.']
+            st.dataframe(
+                df_display.style.format({
+                    "Confiance (%)": "{:.2f} %",
+                    "Montant (€)": "{:,.2f} €",    
+                    "Solde Orig.": "{:,.2f} €",    
+                    "Solde Dest.": "{:,.2f} €" })
+                .background_gradient(subset=['Confiance (%)'], 
+                                cmap=cmap_pastel, 
+                                vmin=50, 
+                                vmax=100), use_container_width=True)
             # GRaphiques
             
             st.divider()
