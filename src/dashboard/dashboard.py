@@ -363,7 +363,7 @@ def page_eda():
     st.write("---")
 
     #---------------création des onglets
-    onglet_projet, onglet_stack, onglet_eda, onglet_flux_de_donnees, onglet_equipe = st.tabs(["Le projet", "La tack", "L'analyse (EDA)", "Flux de données", "L'équipe",])
+    onglet_projet, onglet_stack, onglet_eda, onglet_flux_de_donnees, onglet_equipe = st.tabs(["Le projet", "La stack", "L'analyse (EDA)", "Flux de données", "L'équipe",])
     
     with onglet_projet:
         
