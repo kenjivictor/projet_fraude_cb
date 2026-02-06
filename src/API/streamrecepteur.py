@@ -130,6 +130,7 @@ async def update_metrics(data: dict):
     return {"status": "success"}
 
 
+
 @app.get("/report")
 async def report():
     total_traitees = r.llen("flux_streamlit")
@@ -164,7 +165,6 @@ async def reload_model():
         print(f"Erreur rechargement : {e}")
         return {"status": "error", "message": "Conservation de l'ancien modèle"}
 
+#exposition des métriques de FastApi
 Instrumentator().instrument(app).expose(app)
 
-# Pour lancer le serveur : uv run uvicorn src.API.streamrecepteur:app --reload
-# Pour acceder au rapport : http://127.0.0.1:8000/report

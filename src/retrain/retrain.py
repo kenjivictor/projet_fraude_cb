@@ -198,7 +198,6 @@ async def update_run_name(new_name: str):
 # Le chef d'orchestre
 @flow(name = "Reentrainement du modele de detection de fraude")
 def start_pipeline() :
-    
     with open('state.json', 'r') as f:
         config = json.load(f)
     seuil = config.get("min_rows_to_retrain", 5000)

@@ -136,7 +136,6 @@ def page_stats():
             pourcent_fraude = 0
         
         
-        #affichage des KPIs de façon dynamique
         
     #with placeholder1.container():
         coltitlee1, coltitlee2, coltitlee3 = st.columns([3.5,6,1])
@@ -700,3 +699,7 @@ elif page_selection == "Performance du modèle":
 elif page_selection == "Le projet":
     page_eda()
 
+if page_selection == "Tableau de bord":
+    page_stats()
+elif page_selection == "Performance du modèle":
+    page_performance_modele()

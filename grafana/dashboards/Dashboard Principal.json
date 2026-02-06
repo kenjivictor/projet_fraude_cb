@@ -1117,7 +1117,7 @@
             "uid": "dfbbh9gkjsow0d"
           },
           "editorMode": "code",
-          "expr": "sum(rate(container_cpu_usage_seconds_total{image!=\"\",container_label_org_label_schema_group=\"\"} [1h])) by (name) * 100",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{image!=\"\",container_label_org_label_schema_group=\"\"} [1m])) by (name) * 100",
           "hide": false,
           "instant": false,
           "legendFormat": "__auto",
