@@ -5,7 +5,9 @@ from xgboost import XGBClassifier
 from datetime import datetime
 import os
 import requests
-from prefect import task, flow
+from prefect import task, flow, get_client
+from prefect.context import get_run_context
+from prefect.artifacts import create_markdown_artifact
 import time
 import json
 from dotenv import load_dotenv
@@ -22,7 +24,7 @@ DATASET_ID = os.getenv("GCP_DATASET")
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "gcp-key.json"
 
 # Creation des taches Prefect
-@task(name = "Vérifier les nouvelles données")
+@task(name = "Verifier les nouvelles donnees")
 def check_new_data() :
     sql = f"""
     SELECT count(*) as nombre_lignes
@@ -33,7 +35,7 @@ def check_new_data() :
     print(number_lines)
     return number_lines
 
-@task(name="Réentraînement du modèle")
+@task(name="Reentrainement du modele")
 def retrain_model(nouveau_nombre_lignes):    
     with open('state.json', 'r') as f:
         state = json.load(f)
@@ -112,6 +114,30 @@ def retrain_model(nouveau_nombre_lignes):
         "accuracy": round(accuracy_score(y_val, y_pred) * 100, 2)
     }
     
+    markdown_report = f"""
+# Nouveau modèle entraîné !
+
+### Performance
+| Métrique | Score |
+|:---|---:|
+| **Accuracy** | {metrics_simple['accuracy']}% |
+| **Précision** | {metrics_simple['precision']}% |
+| **Recall** | {metrics_simple['recall']}% |
+| **F1-Score** | {metrics_simple['f1']}% |
+
+### ℹ️ Infos données
+* **Nombre de lignes total** : {nouveau_nombre_lignes}
+* **Date** : {datetime.now().strftime("%d/%m/%Y %H:%M")}
+* **Ratio fraude utilisé** : {new_ratio:.4f}
+"""
+    
+    # Cette ligne envoie le tableau dans le dashboard Prefect
+    create_markdown_artifact(
+        key="training-report",
+        markdown=markdown_report,
+        description="Rapport de performance du modèle XGBoost"
+    )
+    
     # Réentrainement sur l'ensemble des données
     pipeline.fit(X_new, y_new)
 
@@ -146,7 +172,7 @@ def retrain_model(nouveau_nombre_lignes):
 
 
    # Pour lancer la mise à jour sur l'API
-@task(name="Notifier l'API")
+@task(name="Notifier l API")
 def notify_api():
     url_api = "http://api-recepteur:8000/reload"
     response = requests.get(url_api)
@@ -157,9 +183,22 @@ def notify_api():
     else:
         print(f"Echec de la mise à jour du modèle. Réponse API : {response.status_code}")
 
+@task(name="Renommage Systeme")
+async def update_run_name(new_name: str):
+    # On récupère l'ID du run actuel
+    ctx = get_run_context()
+    run_id = ctx.flow_run.id
+    
+    # On se connecte à l'API et on met à jour le nom
+    async with get_client() as client:
+        await client.update_flow_run(run_id, name=new_name)
+    
+    print(f"Nom mis à jour officiellement en BDD : {new_name}")
+
 # Le chef d'orchestre
-@flow(name = "Réentrainement du modèle de détection de fraude")
+@flow(name = "Reentrainement du modele de detection de fraude")
 def start_pipeline() :
+    
     with open('state.json', 'r') as f:
         config = json.load(f)
     seuil = config.get("min_rows_to_retrain", 5000)
@@ -167,27 +206,36 @@ def start_pipeline() :
     nouveau = check_new_data()
     print(f"Ancien: {ancien}, Nouveau: {nouveau}")
     
+    nom_run = ""
+    
     if nouveau >= ancien + seuil :
         print("On réentraîne.")
+        nom_run = (f"RETRAIN - {nouveau} lignes")
         retrain_model(nouveau)
         notify_api()
     else :
         print("Pas assez de nouvelles données pour réentraîner le modèle.")
+        diff = nouveau - ancien
+        nom_run = f"Check - Delta: +{diff}"
+    
+    if nom_run:
+        update_run_name(nom_run)
 
 #delai poru réentrainement toutes les 2 minutes (intervalle=120 sec)
 if __name__ == "__main__":
+    # 1. On lit la configuration une fois au démarrage du script
+    try:
+        with open('state.json', 'r') as f:
+            config = json.load(f)
+        attente = config.get("check_interval_secondes", 120)
+    except Exception as e:
+        print(f"Erreur lecture state.json, repli sur 120s : {e}")
+        attente = 120
 
-    print("Démarrage de l'automatisation de réentraînement...")  
-    while True:
-        try:
-            start_pipeline() 
-            with open('state.json', 'r') as f:
-                config = json.load(f)
-            
-            attente = config.get("check_interval_secondes")
-        except Exception as e:
-            print(f"Erreur : {e}")
-            attente = 120
-            
-        print(f"Attente de {attente} secondes avant la prochaine vérification...")
-        time.sleep(attente) 
+    print(f"Démarrage de l'automatisation (intervalle : {attente}s)...")
+
+    # 2. On passe cette variable à Prefect
+    start_pipeline.serve(
+        name="reentrainement-fraude-deployment",
+        interval=attente
+    )

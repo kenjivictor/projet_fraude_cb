@@ -202,7 +202,7 @@ Cette méthode garantit que le modèle est testé sur des données qu'il n'a jam
 
  - **Prometheus** : http://localhost:9090
 
- - **Processus de réentrainement** : ```docker logs -f retrain-automation```
+ - **Processus de réentrainement (Prefect)** : http://localhost:4200/dashboard
 
  - **Processus d'envoi vers BigQuery/** : ```docker logs -f worker-bigquery```
 
@@ -231,6 +231,8 @@ Le conteneur `retrain-automation` surveille la table BigQuery via Prefect.
  - Modularité : Le seuil de déclenchement (```min_rows_to_retrain```), le nombre de transactions récupérées sur BigQuery  (```limit_sql```) et l'intervalle de vérification (```check_interval_secondes```) sont modifiables sans redémarrage dans ```state.json```.
 
  - Action : Dès que le seuil est atteint, le modèle est réentraîné sur les nouvelles données, archivé, et l'API est notifiée pour charger la nouvelle version instantanément.
+
+![Automatisation du réentrainement](images/prefect.gif)
 
 ---
 
