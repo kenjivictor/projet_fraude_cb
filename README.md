@@ -168,9 +168,9 @@ Cette méthode garantit que le modèle est testé sur des données qu'il n'a jam
 
 4. **Copier le template des variables de ré-entraînement du modèle**
 
-      ```cp .state.json-dist .state.json```
+      ```cp state.json-dist state.json```
 
-      -> Remplir le .state.json avec vos valeurs
+      -> Remplir le state.json avec vos valeurs
 
 5. **Initialisation du projet (uv)**
 

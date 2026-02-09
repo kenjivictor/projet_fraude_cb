@@ -1,6 +1,0 @@
-{
-    "last_count": 0,
-    "limit_sql": 500000,
-    "min_rows_to_retrain": 6000,
-    "check_interval_secondes": 180
-}
