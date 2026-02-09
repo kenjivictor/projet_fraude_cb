@@ -79,6 +79,33 @@ L'application repose sur une architecture micro-services conteneurisée avec Doc
 
 ![Stack Technique](images/resume_stack.png)
 
+**Justification des Choix Techniques**
+
+Le choix de cette stack repose sur trois impératifs : la vitesse de détection (temps réel), la fiabilité des données et l'automatisation du cycle de vie du modèle.
+
+ **-> Ingestion & Résilience (Le flux de données)**
+
+ - **FastAPI :** Choisi pour ses performances asynchrones natives, permettant de traiter des milliers de requêtes de transactions par seconde avec une latence minimale.
+
+ - **Redis (Buffer d'Ingestion) :** Il joue un rôle de tampon critique. En stockant temporairement les transactions entrantes avant leur envoi vers BigQuery, il protège l'API des variations de latence du réseau. Cela garantit qu'aucune donnée de transaction n'est perdue, même en cas de pic de trafic ou de ralentissement momentané des services Cloud.
+
+- **Google BigQuery**: C'est ici que l'historique complet est archivé de manière structurée pour permettre un réentraînement précis du modèle sur des volumes massifs.
+
+**-> Intelligence & Automatisation**
+
+- **XGBoost :** Sélectionné pour sa gestion efficace des données tabulaires et sa capacité à traiter les valeurs manquantes ou les distributions complexes, surpassant les modèles de deep learning classiques sur ce type de données de fraude. Il permet aussi l'utilisation de CUDA
+
+- **Prefect :** Pilote le cycle de vie complet du ML (récupération BigQuery, gestion des échecs, déploiement). Nous l'avons préféré à Airflow car il est beaucoup moins lourd, plus flexible et permet une orchestration "Python-first" sans la complexité de gestion d'infrastructure d'un serveur Airflow complet.
+
+**-> Observabilité & Interface**
+
+ - **Prometheus & Grafana :** Assurent le monitoring technique de l'ensemble de l'infrastructure. Prometheus collecte les métriques brutes de chaque conteneur (usage CPU, consommation RAM, latence réseau), tandis que Grafana les transforme en tableaux de bord visuels. Cela permet de surveiller en temps réel les ressources utilisées par le pipeline.
+
+ - **Streamlit :** Offre une interface utilisateur fluide pour visualiser les rapports de fraude et les résultats du modèle de manière intuitive.
+
+ - **Docker :** Encapsule chaque brique de cette stack pour garantir une portabilité totale en local.
+
+
 ---
 
 **Le pipeline**
