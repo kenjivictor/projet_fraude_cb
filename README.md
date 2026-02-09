@@ -83,7 +83,7 @@ L'application repose sur une architecture micro-services conteneurisée avec Doc
 
 Le choix de cette stack repose sur trois impératifs : la vitesse de détection (temps réel), la fiabilité des données et l'automatisation du cycle de vie du modèle.
 
- **###-> Ingestion & résilience (Le flux de données)**
+ **-> Ingestion & résilience (Le flux de données)**
 
  - **FastAPI :** Choisi pour ses performances asynchrones natives, permettant de traiter des milliers de requêtes de transactions par seconde avec une latence minimale.
 
