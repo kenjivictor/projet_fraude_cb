@@ -10,7 +10,7 @@ Ce projet a été réalisé dans le cadre de la formation Data Analyst à la Wil
 
 ## Vision Business & storytelling
 
-### <u>Le constat : Une hémorragie financière</u>
+### Le constat : Une hémorragie financière
 
 Imaginez une banque digitale en pleine expansion. Chaque jour, des milliers de clients effectuent des transactions cruciales depuis leur mobile. Cette ouverture numérique est devenue la cible privilégiée des réseaux criminels spécialisés dans le détournement de fonds. Pour notre institution, cette faille de sécurité se chiffrait par des pertes réelles de **plusieurs centaines de millions d'euros par an.**
 
@@ -83,7 +83,7 @@ L'application repose sur une architecture micro-services conteneurisée avec Doc
 
 Le choix de cette stack repose sur trois impératifs : la vitesse de détection (temps réel), la fiabilité des données et l'automatisation du cycle de vie du modèle.
 
- **-> Ingestion & Résilience (Le flux de données)**
+ **###<u> -> Ingestion & Résilience (Le flux de données)</u>**
 
  - **FastAPI :** Choisi pour ses performances asynchrones natives, permettant de traiter des milliers de requêtes de transactions par seconde avec une latence minimale.
 
@@ -91,13 +91,13 @@ Le choix de cette stack repose sur trois impératifs : la vitesse de détection 
 
 - **Google BigQuery**: C'est ici que l'historique complet est archivé de manière structurée pour permettre un réentraînement précis du modèle sur des volumes massifs.
 
-**-> Intelligence & Automatisation**
+**<u>-> Intelligence & Automatisation</u>**
 
 - **XGBoost :** Sélectionné pour sa gestion efficace des données tabulaires et sa capacité à traiter les valeurs manquantes ou les distributions complexes, surpassant les modèles de deep learning classiques sur ce type de données de fraude. Il permet aussi l'utilisation de CUDA
 
 - **Prefect :** Pilote le cycle de vie complet du ML (récupération BigQuery, gestion des échecs, déploiement). Nous l'avons préféré à Airflow car il est beaucoup moins lourd, plus flexible et permet une orchestration "Python-first" sans la complexité de gestion d'infrastructure d'un serveur Airflow complet.
 
-**-> Observabilité & Interface**
+**<u>-> Observabilité & Interface</u>**
 
  - **Prometheus & Grafana :** Assurent le monitoring technique de l'ensemble de l'infrastructure. Prometheus collecte les métriques brutes de chaque conteneur (usage CPU, consommation RAM, latence réseau), tandis que Grafana les transforme en tableaux de bord visuels. Cela permet de surveiller en temps réel les ressources utilisées par le pipeline.
 
