@@ -7,14 +7,6 @@ scrape_configs:
     static_configs:
       - targets: ['apirecepteur:8000']
   
-  - job_name: 'stream-envoi'
-    static_configs:
-      - targets: ['streamenvoi:8000', 'streamenvoi:8501']
-  
-  - job_name: 'dashboard'
-    static_configs:
-      - targets: ['dashboard:8501']
-  
   - job_name: 'prometheus'
     static_configs:
       - targets: ['localhost:9090']

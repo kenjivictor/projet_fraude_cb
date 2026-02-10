@@ -19,6 +19,7 @@ API_BASE_URL = os.getenv("API_URL", "http://api-recepteur:8000")
 BASE_URL = os.getenv("BASE_URL", "http://localhost")
 GF_PORT = os.getenv("GF_PORT", "3000")
 PRF_PORT = os.getenv("PRF_PORT", "4200")
+PRM_PORT = os.getenv("PRM_PORT", "9090")
 
 
 
@@ -102,6 +103,7 @@ with st.sidebar:
         menu_icon="cast")
     st.link_button("⚡ Accéder au Monitoring", f"{BASE_URL}:{GF_PORT}/", width = "stretch")
     st.link_button("⚙️ MLOps & Automatisation", f"{BASE_URL}:{PRF_PORT}/dashboard", width = "stretch")
+    st.link_button("🏴 Services Prometheus", f"{BASE_URL}:{PRM_PORT}/targets", width = "stretch")
 #---------- PAge stats    
 #actualisation de la vue en temps réel
 
