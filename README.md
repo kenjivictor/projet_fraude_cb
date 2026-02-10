@@ -12,7 +12,9 @@ Ce projet a été réalisé dans le cadre de la formation Data Analyst à la Wil
 
 ### Le constat : Une hémorragie financière
 
-Imaginez une banque digitale en pleine expansion. Chaque jour, des milliers de clients effectuent des transactions cruciales depuis leur mobile. Cette ouverture numérique est devenue la cible privilégiée des réseaux criminels spécialisés dans le détournement de fonds. Pour notre institution, cette faille de sécurité se chiffrait par des pertes réelles de **plusieurs centaines de millions d'euros par an.**
+Imaginez un écosystème de Mobile Money s’appuyant sur un réseau de milliers d'agents de proximité. Chaque jour, des millions d'utilisateurs transforment leur téléphone en portefeuille pour des transactions vitales : commerce, aide aux proches ou épargne.
+
+Pourtant, cette infrastructure de confiance est devenue la cible privilégiée de réseaux criminels experts en ingénierie sociale et en fraude transactionnelle. Pour notre institution, cette vulnérabilité ne se limite pas à un risque numérique ; elle se traduit par des pertes réelles s'élevant à **plusieurs centaines de millions d'euros par an.**
 
 
 ### La problématique : L'équilibre entre sécurité et fluidité
