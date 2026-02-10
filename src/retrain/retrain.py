@@ -12,6 +12,7 @@ import json
 from dotenv import load_dotenv
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import recall_score, precision_score, f1_score, accuracy_score
+import redis
 
 load_dotenv()
 
@@ -21,6 +22,35 @@ DATASET_ID = os.getenv("GCP_DATASET")
 
 # Permet de récupérer la clé GCP
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "gcp-key.json"
+
+# Creation des taches Prefect
+@task(name="Stats globales ingestion")
+def monitor_simple():
+    # select count dans bigquery
+    sql = f"SELECT COUNT(*) as total FROM `{PROJECT_ID}.{DATASET_ID}.predictions_transaction`"
+    df = pandas_gbq.read_gbq(sql, project_id=PROJECT_ID)
+    total_bq = df['total'][0]
+
+    # Statut worker Redis
+    r = redis.Redis(host=os.getenv("REDIS_HOST", "redis-service"), port=6379, db=0, decode_responses=True)
+    last_count = r.get("last_insert_count") or 0
+    #le format de la date timestamp
+    
+    last_time = datetime.fromtimestamp(float(r.get("last_insert_time"))).strftime("%H:%M:%S") if r.get("last_insert_time") else "Inconnue"
+    
+    # Rapport markdown
+    markdown_info = f"""
+# Monitoring flux
+* **Total de lignes accumulées (BigQuery)** : `{total_bq}`
+* **Dernier paquet traité par le Worker** : `{last_count}` lignes
+* **Heure du dernier envoi** : `{last_time}`
+"""
+    create_markdown_artifact(
+        key="monitoring-ingestion",
+        markdown=markdown_info,
+        description="Statistiques d'ingestion en temps réel"
+    )
+    return total_bq
 
 # Creation des taches Prefect
 @task(name = "Verifier les nouvelles donnees")
@@ -124,7 +154,7 @@ def retrain_model(nouveau_nombre_lignes):
 | **Recall** | {metrics_simple['recall']}% |
 | **F1-Score** | {metrics_simple['f1']}% |
 
-### ℹ️ Infos données
+### Infos données
 * **Nombre de lignes total** : {nouveau_nombre_lignes}
 * **Date** : {datetime.now().strftime("%d/%m/%Y %H:%M")}
 * **Ratio fraude utilisé** : {new_ratio:.4f}
@@ -182,9 +212,11 @@ def notify_api():
     else:
         print(f"Echec de la mise à jour du modèle. Réponse API : {response.status_code}")
 
+
 # Le chef d'orchestre
 @flow(name = "Reentrainement du modele de detection de fraude")
 def start_pipeline() :
+    monitor_simple()
     with open('state.json', 'r') as f:
         config = json.load(f)
     seuil = config.get("min_rows_to_retrain", 5000)

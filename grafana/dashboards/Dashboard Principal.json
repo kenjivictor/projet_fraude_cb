@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 2,
+  "id": 3,
   "links": [],
   "panels": [
     {
@@ -679,7 +679,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "min(time() - container_start_time_seconds{name=~\".+\", container_label_com_docker_compose_project=\"projet_fraud\"})",
+          "expr": "min(time() - container_start_time_seconds{name=~\".+\"})",
           "hide": false,
           "legendFormat": "__auto",
           "range": true,
@@ -745,7 +745,7 @@
             "uid": "dfbbh9gkjsow0d"
           },
           "editorMode": "code",
-          "expr": "sum(container_memory_usage_bytes{image!=\"\", container_label_com_docker_compose_project=\"projet_fraud\"})",
+          "expr": "sum(container_memory_usage_bytes{image!=\"\"})",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -841,7 +841,7 @@
             "uid": "dfbbh9gkjsow0d"
           },
           "editorMode": "code",
-          "expr": "sum(rate(container_cpu_usage_seconds_total{name=~\".+\", container_label_com_docker_compose_project=\"projet_fraud\"}[1m]))*100 / $nb_cpu",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{name=~\".+\"}[1m]))*100 / $nb_cpu",
           "hide": false,
           "instant": false,
           "legendFormat": "__auto",
@@ -923,7 +923,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum(rate(container_memory_usage_bytes{image!=\"\",container_label_com_docker_compose_project=\"projet_fraud\"}[1m])) by (name) /1024 /1024",
+          "expr": "sum(rate(container_memory_usage_bytes{image!=\"\"}[1m])) by (name) /1024 /1024",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -1018,7 +1018,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum by (name)(container_memory_usage_bytes{image!=\"\", container_label_com_docker_compose_project=\"projet_fraud\"})",
+          "expr": "sum by (name)(container_memory_usage_bytes{image!=\"\"})",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -1116,7 +1116,7 @@
             "uid": "dfbbh9gkjsow0d"
           },
           "editorMode": "code",
-          "expr": "sum(rate(container_cpu_usage_seconds_total{image!=\"\", container_label_com_docker_compose_project=\"projet_fraud\"} [1m])) by (name) * 100",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{image!=\"\"} [1m])) by (name) * 100",
           "hide": false,
           "instant": false,
           "legendFormat": "__auto",
@@ -1209,7 +1209,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum(rate(container_memory_usage_bytes{name=~\".+\", container_label_com_docker_compose_project=\"projet_fraud\"}[1m]))",
+          "expr": "sum(rate(container_memory_usage_bytes{name=~\".+\"}[1m]))",
           "legendFormat": "Usage Total",
           "range": true,
           "refId": "A"
@@ -1345,7 +1345,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum(rate(container_network_receive_bytes_total{image!=\"\",container_label_com_docker_compose_project=\"projet_fraud\"}[1m])) by (name)",
+          "expr": "sum(rate(container_network_receive_bytes_total{image!=\"\"}[1m])) by (name)",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -1468,7 +1468,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum(rate(container_network_transmit_bytes_total{image!=\"\",container_label_com_docker_compose_project=\"projet_fraud\"}[1m])) by (name)",
+          "expr": "sum(rate(container_network_transmit_bytes_total{image!=\"\"}[1m])) by (name)",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -1513,5 +1513,5 @@
   "timezone": "browser",
   "title": "Dashboard Principal",
   "uid": "advxg5j",
-  "version": 1
+  "version": 3
 }
