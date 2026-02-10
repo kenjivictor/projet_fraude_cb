@@ -174,9 +174,13 @@ def page_stats():
             else:
                 status_alerte = "🟢 CALME"
             metric_card(label="État du Système", value=status_alerte)
-            
-        st.write("")
-        st.info("KSh (KES): Shilling Kenyan (monnaie utilisée dans le dataset).")
+        st.write(" ") 
+        st.markdown(
+        "<p style='text-align: center; color: gray; font-size: 0.8rem; font-style: italic;'>"
+        "💡 KSh (KES) : Shilling Kenyan — monnaie locale utilisée pour l'analyse des flux."
+        "</p>", 
+        unsafe_allow_html=True)    
+
         # affichage des détails des fraudes détectées
         st.divider()
         if nb_fraudes_detectees >0:
