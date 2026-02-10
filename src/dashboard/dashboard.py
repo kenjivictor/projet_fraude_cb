@@ -10,6 +10,18 @@ import json
 import plotly.express as px
 from pathlib import Path
 import matplotlib.colors as mcolors
+from dotenv import load_dotenv
+
+load_dotenv()  # Charge et résout les variables imbriquées
+REDIS_HOST = os.getenv("REDIS_HOST", "redis-service")
+REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
+API_BASE_URL = os.getenv("API_URL", "http://api-recepteur:8000")
+BASE_URL = os.getenv("BASE_URL", "http://localhost")
+GF_PORT = os.getenv("GF_PORT", "3000")
+PRF_PORT = os.getenv("PRF_PORT", "4200")
+PRM_PORT = os.getenv("PRM_PORT", "9090")
+
+
 
 # Page conffig
 st.set_page_config(
@@ -39,7 +51,7 @@ def metric_card(label, value, color="#f0f2f6"):
     )
 
 # Connexion à Redis
-r_dash = redis.Redis(host="redis-service", port=6379, db=0, decode_responses=True)
+r_dash = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=0, decode_responses=True)
 
 def format_chiffres(n):
     if n >= 1000000000:
@@ -60,12 +72,10 @@ st.set_page_config(
     layout="wide", 
     initial_sidebar_state="expanded")
 
-API_BASE_URL = os.getenv("API_URL", "http://api-recepteur:8000")
-REPORT_URL = f"{API_BASE_URL}"
 
 def get_report():
     try:
-        response = requests.get(REPORT_URL + "/report", timeout=2)
+        response = requests.get(API_BASE_URL + "/report", timeout=2)
         if response.status_code == 200:
             return response.json()
     except Exception:
@@ -74,7 +84,7 @@ def get_report():
 
 def get_reload():
     try:
-        response = requests.get(REPORT_URL + "/reload", timeout=2)
+        response = requests.get(API_BASE_URL + "/reload", timeout=2)
         if response.status_code == 200:
             return response.json()
     except Exception:
@@ -91,8 +101,9 @@ with st.sidebar:
         options=["Tableau de bord", "Performance du modèle", "Le projet"],
         icons=["speedometer2", "graph-up-arrow", "book"], 
         menu_icon="cast")
-    st.link_button("⚡ Accéder au Monitoring", "http://localhost:3000/", width = "stretch")
-    st.link_button("⚙️ MLOps & Automatisation", "http://localhost:4200/dashboard", width = "stretch")
+    st.link_button("⚡ Accéder au Monitoring", f"{BASE_URL}:{GF_PORT}/", width = "stretch")
+    st.link_button("⚙️ MLOps & Automatisation", f"{BASE_URL}:{PRF_PORT}/dashboard", width = "stretch")
+    st.link_button("🏴 Services Prometheus", f"{BASE_URL}:{PRM_PORT}/targets", width = "stretch")
 #---------- PAge stats    
 #actualisation de la vue en temps réel
 
@@ -239,6 +250,8 @@ def page_stats():
                 st.plotly_chart(fig_bar, use_container_width=True, key=f"bar_chart_type{time.time()}") 
             st.divider()         
     #time.sleep(1)
+    else: 
+        st.error("Impossible de joindre l'API")
 
         
 #--------Page performance modèle
@@ -403,7 +416,9 @@ def page_performance_modele():
                 Les indicateurs statistiques s'affineront et se stabiliseront à mesure que le volume de données traitées augmentera.
                 """)
             
-        st.divider()    
+        st.divider()
+    else: 
+        st.error("Impossible de joindre l'API")
 
 ##-------------------------------- EDA ----------------------------
 def page_eda():

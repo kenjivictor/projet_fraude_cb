@@ -16,4 +16,4 @@ COPY gcp-key.json ./gcp-key.json
 COPY images/ ./images/
 
 # Ouvrir les port streamlit fastapi
-EXPOSE 8000 8501
+#EXPOSE 8000 8501

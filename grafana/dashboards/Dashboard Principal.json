@@ -679,7 +679,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "min(time() - container_start_time_seconds{name=~\".+\"})",
+          "expr": "min(time() - container_start_time_seconds{name=~\".+\", container_label_com_docker_compose_project=\"projet_fraud\"})",
           "hide": false,
           "legendFormat": "__auto",
           "range": true,
@@ -745,7 +745,7 @@
             "uid": "dfbbh9gkjsow0d"
           },
           "editorMode": "code",
-          "expr": "sum(container_memory_usage_bytes{image!=\"\"})",
+          "expr": "sum(container_memory_usage_bytes{image!=\"\", container_label_com_docker_compose_project=\"projet_fraud\"})",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -841,7 +841,7 @@
             "uid": "dfbbh9gkjsow0d"
           },
           "editorMode": "code",
-          "expr": "sum(rate(container_cpu_usage_seconds_total{name=~\".+\"}[1m]))*100 / $nb_cpu",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{name=~\".+\", container_label_com_docker_compose_project=\"projet_fraud\"}[1m]))*100 / $nb_cpu",
           "hide": false,
           "instant": false,
           "legendFormat": "__auto",
@@ -898,7 +898,7 @@
         ]
       },
       "gridPos": {
-        "h": 8,
+        "h": 9,
         "w": 12,
         "x": 0,
         "y": 19
@@ -923,7 +923,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum(rate(container_memory_usage_bytes{image!=\"\",container_label_org_label_schema_group=\"\"}[1m])) by (name) /1024 /1024",
+          "expr": "sum(rate(container_memory_usage_bytes{image!=\"\",container_label_com_docker_compose_project=\"projet_fraud\"}[1m])) by (name) /1024 /1024",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -995,7 +995,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
+        "h": 9,
         "w": 12,
         "x": 12,
         "y": 19
@@ -1018,7 +1018,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum by (name)(container_memory_usage_bytes{image!=\"\",container_label_org_label_schema_group=\"\"})",
+          "expr": "sum by (name)(container_memory_usage_bytes{image!=\"\", container_label_com_docker_compose_project=\"projet_fraud\"})",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -1089,10 +1089,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
+        "h": 9,
         "w": 12,
         "x": 0,
-        "y": 27
+        "y": 28
       },
       "id": 1,
       "options": {
@@ -1116,7 +1116,7 @@
             "uid": "dfbbh9gkjsow0d"
           },
           "editorMode": "code",
-          "expr": "sum(rate(container_cpu_usage_seconds_total{image!=\"\",container_label_org_label_schema_group=\"\"} [1m])) by (name) * 100",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{image!=\"\", container_label_com_docker_compose_project=\"projet_fraud\"} [1m])) by (name) * 100",
           "hide": false,
           "instant": false,
           "legendFormat": "__auto",
@@ -1186,10 +1186,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
+        "h": 9,
         "w": 12,
         "x": 12,
-        "y": 27
+        "y": 28
       },
       "id": 2,
       "options": {
@@ -1209,7 +1209,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum(rate(container_memory_usage_bytes{name=~\".+\"}[1m]))",
+          "expr": "sum(rate(container_memory_usage_bytes{name=~\".+\", container_label_com_docker_compose_project=\"projet_fraud\"}[1m]))",
           "legendFormat": "Usage Total",
           "range": true,
           "refId": "A"
@@ -1220,7 +1220,7 @@
             "uid": "dfbbh9gkjsow0d"
           },
           "editorMode": "code",
-          "expr": "sum(rate(container_memory_working_set_bytes{name=~\".+\"}[1m]))",
+          "expr": "sum(rate(container_memory_working_set_bytes{name=~\".+\", container_label_com_docker_compose_project=\"projet_fraud\"}[1m]))",
           "hide": false,
           "instant": false,
           "legendFormat": "Usage Réel (cache exclu)",
@@ -1318,10 +1318,10 @@
         ]
       },
       "gridPos": {
-        "h": 9,
+        "h": 10,
         "w": 12,
         "x": 0,
-        "y": 35
+        "y": 37
       },
       "id": 8,
       "options": {
@@ -1345,7 +1345,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum(rate(container_network_receive_bytes_total{image!=\"\",container_label_org_label_schema_group=\"\"}[1m])) by (name)",
+          "expr": "sum(rate(container_network_receive_bytes_total{image!=\"\",container_label_com_docker_compose_project=\"projet_fraud\"}[1m])) by (name)",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -1441,10 +1441,10 @@
         ]
       },
       "gridPos": {
-        "h": 9,
+        "h": 10,
         "w": 12,
         "x": 12,
-        "y": 35
+        "y": 37
       },
       "id": 9,
       "options": {
@@ -1468,7 +1468,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum(rate(container_network_transmit_bytes_total{image!=\"\",container_label_org_label_schema_group=\"\"}[1m])) by (name)",
+          "expr": "sum(rate(container_network_transmit_bytes_total{image!=\"\",container_label_com_docker_compose_project=\"projet_fraud\"}[1m])) by (name)",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -1513,5 +1513,5 @@
   "timezone": "browser",
   "title": "Dashboard Principal",
   "uid": "advxg5j",
-  "version": 2
+  "version": 1
 }

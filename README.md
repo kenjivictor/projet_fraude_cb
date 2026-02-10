@@ -193,27 +193,33 @@ Cette méthode garantit que le modèle est testé sur des données qu'il n'a jam
 
       -> Remplir le .env avec vos variables d'environnement
 
-4. **Initialisation du projet (uv)**
+4. **Copier le template des variables de ré-entraînement du modèle**
+
+      ```cp state.json-dist state.json```
+
+      -> Remplir le state.json avec vos valeurs
+
+5. **Initialisation du projet (uv)**
 
       ```uv sync```
 
-5. **Découpe du dataset**
+6. **Découpe du dataset**
 
       ```uv run notebooks/decoupe.py```
    
       -> Dataset ```PaySim_stream.csv``` et ```PaySim_historical.csv``` créés dans le dossier `./data/`
 
-6. **Générer la clé Json Bigquery**
+7. **Générer la clé Json Bigquery**
 
       - Activer l'API BigQuery, et créer un compte de service avec les rôles BigQuery Admin et Storage Admin.
 
       - Générer une clé JSON, la nommer ```gcp-key.json``` et la placer à la racine du projet.
 
-7. **Ingestion des données historiques dans BigQuery**
+8. **Ingestion des données historiques dans BigQuery**
 
       ```uv run src/ingestion/ingestion.py```
 
-8. **Lancer l'infrastructure :**
+9. **Lancer l'infrastructure :**
 
       ```docker compose up --build```
 

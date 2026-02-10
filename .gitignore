@@ -10,6 +10,8 @@ wheels/
 .venv
 .env
 
+# paramètres de réentrainement
+state.json
 
 # API KEY
 gcp-key.json
