@@ -8,8 +8,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # connexion à Redis
-REDIS_HOST = os.getenv("REDIS_HOST", "redis-service")
-REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
+REDIS_HOST = os.getenv("REDIS_HOST")
+REDIS_PORT = int(os.getenv("REDIS_PORT"))
 PROJECT_ID = os.getenv("GCP_PROJECT_ID")
 DATASET_ID = os.getenv("GCP_DATASET")
 # On crée la connexion. decode_responses=True permet de recevoir du texte 
