@@ -70,6 +70,7 @@ def retrain_model(nouveau_nombre_lignes):
         state = json.load(f)
     
     limite_echantillon = state.get("limit_sql", 200000)
+    ancien_recall = state.get("best_recall")
     try:
         pipeline = joblib.load("src/models/pipeline_latest.joblib")
         print("Dernier pipeline chargé pour mise à jour.")
@@ -143,8 +144,44 @@ def retrain_model(nouveau_nombre_lignes):
         "accuracy": round(accuracy_score(y_val, y_pred) * 100, 2)
     }
     
+    # On recupere le nouveau recall
+    is_update = False
+    nouveau_recall = metrics_simple['recall']
+    
+    if nouveau_recall > ancien_recall :
+        state["best_recall"] = nouveau_recall
+        status_prod = "🟢 Mis en production !"
+        is_update = True
+            # Réentrainement sur l'ensemble des données
+        pipeline.fit(X_new, y_new)
+
+        # Sauvegarde et versionning
+        timestamp = datetime.now().strftime("%Y%m%d")
+        archive_name = f"src/models/archives/pipeline_{timestamp}.joblib"
+        latest_name = "src/models/pipeline_latest.joblib"
+
+        # On sauvegarde deux fois
+        joblib.dump(pipeline, archive_name) # L'archive 
+        joblib.dump(pipeline, latest_name)  # Le fichier que le script chargera au début
+
+        print(f"Archive créée : {archive_name}")
+        print(f"Fichier 'latest' mis à jour.")
+        
+    else :
+        status_prod = "🔴 Rejeté !"    
+    
+    if is_update:
+        indicateur = "**STATUT : MIS À JOUR** (Meilleure performance du recall !)"
+    else:
+        indicateur = "**STATUT : REJETÉ** (Performance insuffisante)"
+    
     markdown_report = f"""
-# Nouveau modèle entraîné !
+# Rapport de Réentraînement
+{indicateur}
+
+### Comparaison Recall
+* **Ancien record** : {ancien_recall}%
+* **Nouveau score** : {metrics_simple['recall']}%
 
 ### Performance
 | Métrique | Score |
@@ -167,25 +204,11 @@ def retrain_model(nouveau_nombre_lignes):
         description="Rapport de performance du modèle XGBoost"
     )
     
-    # Réentrainement sur l'ensemble des données
-    pipeline.fit(X_new, y_new)
-
-    # Sauvegarde et versionning
-    timestamp = datetime.now().strftime("%Y%m%d")
-    archive_name = f"src/models/archives/pipeline_{timestamp}.joblib"
-    latest_name = "src/models/pipeline_latest.joblib"
-
-    # On sauvegarde deux fois
-    joblib.dump(pipeline, archive_name) # L'archive 
-    joblib.dump(pipeline, latest_name)  # Le fichier que le script chargera au début
-
-    print(f"Archive créée : {archive_name}")
-    print(f"Fichier 'latest' mis à jour.")
-    
     # Envoi des scores a l'API
     try:
         payload = {
             "version_id": datetime.now().strftime("%d/%m/%Y %H:%M"),
+            "status_prod": status_prod,
             "metrics": metrics_simple
         }
         requests.post("http://api-recepteur:8000/update_metrics", json=payload, timeout=5)
@@ -198,7 +221,7 @@ def retrain_model(nouveau_nombre_lignes):
         json.dump(state, f, indent = 4)
     
     print(f"Compteur mis à jour : {nouveau_nombre_lignes} lignes.")
-
+    return is_update
 
    # Pour lancer la mise à jour sur l'API
 @task(name="Notifier l API")
@@ -226,8 +249,9 @@ def start_pipeline() :
     
     if nouveau >= ancien + seuil :
         print("On réentraîne.")
-        retrain_model(nouveau)
-        notify_api()
+        success = retrain_model(nouveau)
+        if success:
+            notify_api()
     else :
         print("Pas assez de nouvelles données pour réentraîner le modèle.")
         diff = nouveau - ancien

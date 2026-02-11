@@ -29,11 +29,12 @@ except Exception:
     
 # Historique metrique modele v1
 historique_versions = [{"version_id": "V1 (Initiale)",
+        "status_prod": "🟢 Mis en production !",
         "metrics": {
             "recall": 87.00,
             "precision": 63.00,
             "f1": 73.00,
-            "accuracy": 100.00}}]  
+            "accuracy": 99.43}}]  
 
 # défini le Json attendu en entree
 class TransmissionRequest(BaseModel):
@@ -113,9 +114,9 @@ async def recevoir_transaction(transaction: TransmissionRequest):
     if prediction[0] == 1:
         r.lpush("liste_fraudes", json_data)
         # r.expire("liste_fraudes", 172800) => Facultatif on garde 2j la liste
-        print(f"ALERTE : Fraude détectée ! Montant: {transaction.amount}€")
+        print(f"ALERTE : Fraude détectée ! Montant: {transaction.amount} KSh")
     else:
-        print(f"Transaction saine : {transaction.amount}€")
+        print(f"Transaction saine : {transaction.amount} KSh")
     return {"prediction": verdict,"probabilite": f"{round(probabilite, 2)}%", "status": "success"}
 
 # Metriques modele

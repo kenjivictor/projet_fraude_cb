@@ -12,7 +12,9 @@ Ce projet a été réalisé dans le cadre de la formation Data Analyst à la Wil
 
 ### Le constat : Une hémorragie financière
 
-Imaginez une banque digitale en pleine expansion. Chaque jour, des milliers de clients effectuent des transactions cruciales depuis leur mobile. Cette ouverture numérique est devenue la cible privilégiée des réseaux criminels spécialisés dans le détournement de fonds. Pour notre institution, cette faille de sécurité se chiffrait par des pertes réelles de **plusieurs centaines de millions d'euros par an.**
+Imaginez un écosystème de Mobile Money s’appuyant sur un réseau de milliers d'agents de proximité. Chaque jour, des millions d'utilisateurs transforment leur téléphone en portefeuille pour des transactions vitales : commerce, aide aux proches ou épargne.
+
+Pourtant, cette infrastructure de confiance est devenue la cible privilégiée de réseaux criminels experts en ingénierie sociale et en fraude transactionnelle. Pour notre institution, cette vulnérabilité ne se limite pas à un risque numérique ; elle se traduit par des pertes réelles s'élevant à **plusieurs centaines de millions d'euros par an.**
 
 
 ### La problématique : L'équilibre entre sécurité et fluidité
@@ -35,7 +37,7 @@ Pour garder un contrôle total sur la solution, nous avons déployé deux centre
 
  - Pour garder le contrôle, nous avons développé un **panneau de suivi Streamlit**. Il permet de visualiser les flux en temps réel, d'analyser les comportements suspects et de piloter la stratégie de sécurité de la banque. C'est ici que l'intelligence artificielle rencontre l'humain.
 
-![Détection de fraudes](images/Streamlit_fraudess.gif)
+![Détection de fraudes](images/streamlit_fraude.gif)
 
  - **La supervision infrastructure (Grafana & Prometheus)** : Cette interface surveille la santé technique du système. Nous suivons en temps réel la consommation CPU/RAM de chaque conteneur et la latence de l'API pour garantir une haute disponibilité et des performances constantes sous la charge.
 
@@ -50,7 +52,7 @@ Pour garder un contrôle total sur la solution, nous avons déployé deux centre
 
 3. **L'efficacité des alertes (Précision de 63 %)** : Sur l'ensemble des transactions bloquées pour suspicion, près de 2 sur 3 sont réellement des fraudes. Ce score élevé permet aux équipes de sécurité de se concentrer sur des menaces hautement probables plutôt que de traiter un volume ingérable de fausses alertes.
 
-![Métriques du modèle](images/performance_modeles.gif)
+![Métriques du modèle](images/performances_modele.gif)
 
 
 ### Note sur la simulation de la "Vérité Terrain"
@@ -265,7 +267,22 @@ Le conteneur `retrain-automation` surveille la table BigQuery via Prefect.
 
  - Action : Dès que le seuil est atteint, le modèle est réentraîné sur les nouvelles données, archivé, et l'API est notifiée pour charger la nouvelle version instantanément.
 
-![Automatisation du réentrainement](images/prefect.gif)
+![Automatisation du réentrainement](images/prefect2.gif)
+
+### Validation et sécurité du pipeline (Model Gating)
+
+Pour garantir que la qualité du service ne se dégrade jamais, nous avons implémenté une sécurité de type **"Model Gating"**. Le système compare systématiquement le `Recall` du nouveau modèle entraîné avec le record historique.
+
+**Fonctionnement observé :**
+
+| Étape | Logique appliquée |
+| :--- | :--- |
+| **Phase d'apprentissage** | Lors de l'initialisation (ou après un reset), le système enregistre les premières performances comme nouveaux records à battre. |
+| **Sécurité active** | Si un réentraînement produit un modèle dont le Recall est inférieur au record (ex: 91.69% vs 93.49%), le pipeline **rejette** automatiquement la mise à jour et conserve l'ancien "champion" en production. |
+
+> **Note technique :** Ce mécanisme protège contre les réentraînements sur des données bruitées ou des régressions de performance. L'API n'est notifiée (`/reload`) que si le statut passe à "Mis en production".
+
+![Statut](images/statut_modele.png)
 
 ---
 

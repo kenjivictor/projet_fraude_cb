@@ -55,22 +55,16 @@ r_dash = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=0, decode_responses=Tr
 
 def format_chiffres(n):
     if n >= 1000000000:
-        return f"{n / 1000000000:.2f} Md€"
+        return f"{n / 1000000000:.2f} Md KSh"
     if n >= 1000000:
-        return f"{n / 1000000:.1f} M€"
+        return f"{n / 1000000:.1f} M KSh"
     if n >= 1000:
-        return f"{n / 1000:.1f} k€"
-    return f"{n} €"
+        return f"{n / 1000:.1f} k KSh"
+    return f"{n} KSh"
 
 def format_metriques(n):
     n= float(n)
     return f"{n:,.0f}".replace(",", " ")
-
-# Page config
-st.set_page_config(
-    page_title="Détection de Fraude",
-    layout="wide", 
-    initial_sidebar_state="expanded")
 
 
 def get_report():
@@ -179,8 +173,14 @@ def page_stats():
                 status_alerte = "🟠 ACTIF"
             else:
                 status_alerte = "🟢 CALME"
-
             metric_card(label="État du Système", value=status_alerte)
+        st.write(" ") 
+        st.markdown(
+        "<p style='text-align: center; color: gray; font-size: 0.8rem; font-style: italic;'>"
+        "💡 KSh (KES) : Shilling Kenyan — monnaie locale utilisée pour l'analyse des flux."
+        "</p>", 
+        unsafe_allow_html=True)    
+
         # affichage des détails des fraudes détectées
         st.divider()
         if nb_fraudes_detectees >0:
@@ -192,13 +192,13 @@ def page_stats():
             cmap_pastel = mcolors.LinearSegmentedColormap.from_list("pastel_rdylgn", colors)
             colonnes_a_garder = ['type', 'amount','probabilite', 'nameOrig', 'oldbalanceOrg', 'nameDest', 'oldbalanceDest']
             df_display = df[colonnes_a_garder].copy()
-            df_display.columns = ['Type', 'Montant (€)','Confiance (%)', 'ID Origine', 'Solde Orig.', 'ID Destinataire', 'Solde Dest.']
+            df_display.columns = ['Type', 'Montant (KSh)','Confiance (%)', 'ID Origine', 'Solde Orig.', 'ID Destinataire', 'Solde Dest.']
             st.dataframe(
                 df_display.style.format({
                     "Confiance (%)": "{:.2f} %",
-                    "Montant (€)": "{:,.2f} €",    
-                    "Solde Orig.": "{:,.2f} €",    
-                    "Solde Dest.": "{:,.2f} €" })
+                    "Montant (KSh)": "{:,.2f} KSh",    
+                    "Solde Orig.": "{:,.2f} KSh",    
+                    "Solde Dest.": "{:,.2f} KSh" })
                 .background_gradient(subset=['Confiance (%)'], 
                                 cmap=cmap_pastel, 
                                 vmin=50, 
@@ -349,6 +349,7 @@ def page_performance_modele():
             for version in report["history"]:
                 row = {
                     "Version": version["version_id"],
+                    "Statut": version.get("status_prod"),
                     "Recall (%)": version["metrics"]["recall"],
                     "Précision (%)": version["metrics"]["precision"],
                     "F1-Score (%)": version["metrics"]["f1"],
