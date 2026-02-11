@@ -32,7 +32,7 @@ def monitor_simple():
     total_bq = df['total'][0]
 
     # Statut worker Redis
-    r = redis.Redis(host=os.getenv("REDIS_HOST", "redis-service"), port=6379, db=0, decode_responses=True)
+    r = redis.Redis(host=os.getenv("REDIS_HOST"), port=int(os.getenv("REDIS_PORT")), db=0, decode_responses=True)
     last_count = r.get("last_insert_count") or 0
     #le format de la date timestamp
     

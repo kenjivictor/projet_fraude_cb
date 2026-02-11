@@ -13,8 +13,8 @@ import time
 app = FastAPI()
 
 # configuration & connexion au conteneur redis
-REDIS_HOST = os.getenv("REDIS_HOST", "redis") 
-REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
+REDIS_HOST = os.getenv("REDIS_HOST") 
+REDIS_PORT = int(os.getenv("REDIS_PORT"))
 r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=0)
 
 # chargement du pipeline
