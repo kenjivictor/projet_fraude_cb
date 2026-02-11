@@ -1,3 +1,5 @@
+name: projet_fraude_cb
+
 services:
   # conteneur recepteur
   api-recepteur:

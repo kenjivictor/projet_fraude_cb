@@ -19,6 +19,8 @@ load_dotenv()
 # On récupère les variables du .env
 PROJECT_ID = os.getenv("GCP_PROJECT_ID")
 DATASET_ID = os.getenv("GCP_DATASET")
+REDIS_HOST = os.getenv("REDIS_HOST")
+REDIS_PORT = os.getenv("REDIS_PORT")
 
 # Permet de récupérer la clé GCP
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "gcp-key.json"
@@ -32,7 +34,7 @@ def monitor_simple():
     total_bq = df['total'][0]
 
     # Statut worker Redis
-    r = redis.Redis(host=os.getenv("REDIS_HOST"), port=int(os.getenv("REDIS_PORT")), db=0, decode_responses=True)
+    r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=0, decode_responses=True)
     last_count = r.get("last_insert_count") or 0
     #le format de la date timestamp
     

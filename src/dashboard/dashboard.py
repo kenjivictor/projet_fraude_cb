@@ -13,13 +13,13 @@ import matplotlib.colors as mcolors
 from dotenv import load_dotenv
 
 load_dotenv()  # Charge et résout les variables imbriquées
-REDIS_HOST = os.getenv("REDIS_HOST", "redis-service")
-REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
-API_BASE_URL = os.getenv("API_URL", "http://api-recepteur:8000")
-BASE_URL = os.getenv("BASE_URL", "http://localhost")
-GF_PORT = os.getenv("GF_PORT", "3000")
-PRF_PORT = os.getenv("PRF_PORT", "4200")
-PRM_PORT = os.getenv("PRM_PORT", "9090")
+REDIS_HOST = os.getenv("REDIS_HOST")
+REDIS_PORT = int(os.getenv("REDIS_PORT"))
+API_BASE_URL = os.getenv("API_URL")
+BASE_URL = os.getenv("BASE_URL")
+GF_PORT = os.getenv("GF_PORT")
+PRF_PORT = os.getenv("PRF_PORT")
+PRM_PORT = os.getenv("PRM_PORT")
 
 
 
