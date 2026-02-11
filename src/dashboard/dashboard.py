@@ -680,7 +680,7 @@ Cette méthode garantit que le modèle est testé sur des données qu'il n'a jam
                 st.markdown("##### 4. Montants des fraudes par type de transaction")
                 st.markdown("""
 L'analyse de la distribution montre que la majorité des fraudes porte sur des montants significatifs, 
-avec un pic marqué entre **100 000 € et 1 000 000 €**. La présence d'une barre isolée à l'extrémité droite 
+avec un pic marqué entre **100 000 KES et 1 000 000 KES**. La présence d'une barre isolée à l'extrémité droite 
 suggère l'existence d'un **plafond transactionnel** fréquemment atteint par les fraudeurs.
 """)  
 
