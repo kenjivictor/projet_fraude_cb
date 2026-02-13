@@ -73,6 +73,8 @@ def retrain_model(nouveau_nombre_lignes):
     
     limite_echantillon = state.get("limit_sql", 200000)
     ancien_recall = state.get("best_recall")
+    ancien_f1 = state.get("best_f1")
+    
     try:
         pipeline = joblib.load("src/models/pipeline_latest.joblib")
         print("Dernier pipeline chargé pour mise à jour.")
@@ -149,9 +151,11 @@ def retrain_model(nouveau_nombre_lignes):
     # On recupere le nouveau recall
     is_update = False
     nouveau_recall = metrics_simple['recall']
+    nouveau_f1 = metrics_simple['f1']
     
-    if nouveau_recall > ancien_recall :
+    if nouveau_recall > ancien_recall and nouveau_f1 > ancien_f1:
         state["best_recall"] = nouveau_recall
+        state["best_f1"] = nouveau_f1
         status_prod = "🟢 Mis en production !"
         is_update = True
             # Réentrainement sur l'ensemble des données
@@ -178,12 +182,16 @@ def retrain_model(nouveau_nombre_lignes):
         indicateur = "**STATUT : REJETÉ** (Performance insuffisante)"
     
     markdown_report = f"""
-# Rapport de Réentraînement
+# Rapport de réentraînement
 {indicateur}
 
 ### Comparaison Recall
 * **Ancien record** : {ancien_recall}%
 * **Nouveau score** : {metrics_simple['recall']}%
+
+### Comparaison F1-Score
+* **Ancien record** : {ancien_f1}% 
+* **Nouveau score** : {metrics_simple['f1']}%
 
 ### Performance
 | Métrique | Score |

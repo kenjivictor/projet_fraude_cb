@@ -39,6 +39,7 @@ with open('state.json', 'r') as f:
 
 state["last_count"] = 0
 state['best_recall'] = 87
+state['best_f1'] = 73
 with open('state.json', 'w') as f:
     json.dump(state, f, indent = 4)
     

@@ -1,4 +1,4 @@
-{
+{   "best_f1": 73,
     "best_recall": 87,
     "last_count": 0,
     "limit_sql": 200000,
